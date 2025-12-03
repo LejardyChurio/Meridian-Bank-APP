@@ -252,7 +252,6 @@ convertToSupabaseFormat(username, localData) {
         apellidos: apellidos,
         email: clientData.email,
         telefono: clientData.phone,
-        ciudad: localData.ciudad || 'Caracas',
         saldo_cuenta: clientData.account.balance,
         bank_code: 'BANCO_2',
         bank_name: 'Meridian Banco',
@@ -653,4 +652,5 @@ window.saveTransactionToSupabase = saveTransactionToSupabase;
 console.log('🔄 Sistema híbrido localStorage + Supabase inicializado');
 
 console.log('📊 Estado:', getHybridSystemStatus());
+
 
