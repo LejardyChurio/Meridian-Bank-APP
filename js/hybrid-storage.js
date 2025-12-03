@@ -237,31 +237,30 @@ class HybridStorage {
     }
 
     // Convertir de localStorage a Supabase
-    convertToSupabaseFormat(username, localData) {
-        const clientData = localData.clientData;
-        const [nombres, ...apellidosArray] = clientData.name.split(' ');
-        const apellidos = apellidosArray.join(' ');
+convertToSupabaseFormat(username, localData) {
+    const clientData = localData.clientData;
+    const [nombres, ...apellidosArray] = clientData.name.split(' ');
+    const apellidos = apellidosArray.join(' ');
 
-        // Obtener datos del registro (directamente del localData si están disponibles)
-        let documentNumber = localData.documento ? localData.documento.replace(/\./g, '') : 'N/A';
-        let documentType = localData.tipoDocumento || (clientData.account.accountType === 'Ahorros' ? 'V' : 'J');
-
-        return {
-            username: username,
-            password_hash: localData.password,
-            document_type: documentType,
-            document_number: documentNumber, // Número de cédula/RIF sin puntos
-            account_number: clientData.account.accountNumber, // Número de cuenta bancaria
-            nombres: nombres,
-            apellidos: apellidos,
-            email: clientData.email,
-            telefono: clientData.phone,
-            ciudad: localData.ciudad || 'N/A', // Agregar ciudad
-            saldo_cuenta: clientData.account.balance,
-            fecha_registro: localData.fechaRegistro || new Date().toISOString(),
-            estado: localData.estado || 'activo'
-        };
-    }
+    return {
+        username: username,
+        password_hash: localData.password,
+        document_type: localData.tipoDocumento || 'V',
+        document_number: localData.documento ? localData.documento.replace(/\./g, '') : 'N/A',
+        account_number: clientData.account.accountNumber,
+        nombres: nombres,
+        apellidos: apellidos,
+        email: clientData.email,
+        telefono: clientData.phone,
+        ciudad: localData.ciudad || 'Caracas',
+        saldo_cuenta: clientData.account.balance,
+        bank_code: 'BANCO_2',
+        bank_name: 'Meridian Banco',
+        status: 'active',
+        fecha_registro: localData.fechaRegistro || new Date().toISOString(),
+        estado: localData.estado || 'activo'
+    };
+}
 
     // Convertir de Supabase a localStorage
     convertFromSupabaseFormat(supabaseData) {
@@ -654,3 +653,4 @@ window.saveTransactionToSupabase = saveTransactionToSupabase;
 console.log('🔄 Sistema híbrido localStorage + Supabase inicializado');
 
 console.log('📊 Estado:', getHybridSystemStatus());
+
