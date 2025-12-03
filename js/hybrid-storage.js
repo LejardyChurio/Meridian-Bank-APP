@@ -330,44 +330,55 @@ convertToSupabaseFormat(username, localData) {
         }
     }
 
-    // Guardar transacciones en Supabase
-    async saveTransactionsToSupabase(username, transactions) {
-        try {
-            // Obtener ID del cliente
-            const clients = await supabase.select('clients', 'id', { username: username });
-            if (clients.length === 0) return;
+   // Guardar transacciones en Supabase
+async saveTransactionsToSupabase(username, transactions) {
+    try {
+        // Obtener ID del cliente
+        const clients = await supabase.select('clients', 'id', { username: username });
+        if (clients.length === 0) return;
 
-            const clientId = clients[0].id;
+        const clientId = clients[0].id;
 
-            // Procesar cada transacción
-            for (const transaction of transactions) {
-                const transactionData = {
-                    client_id: clientId,
-                    transaction_id: transaction.id,
-                    date: transaction.date,
-                    description: transaction.description,
-                    amount: transaction.amount,
-                    transaction_type: transaction.type,
-                    reference: transaction.reference,
-                    account_id: transaction.accountId,
-                    auth_code: transaction.authCode || null,
-                    status: 'completed'
-                };
+        // Procesar cada transacción
+        for (const transaction of transactions) {
+            const transactionData = {
+                client_id: clientId,
+                transaction_id: transaction.id,
+                date: transaction.date,
+                description: transaction.description,
+                amount: transaction.amount,
+                transaction_type: transaction.type,
+                reference: transaction.reference,
+                account_id: transaction.accountId,
+                auth_code: transaction.authCode || null,
+                status: 'completed'
+            };
 
-                // Verificar si la transacción ya existe
-                const existing = await supabase.select('transactions', 'id', { transaction_id: transaction.id });
-                
-                if (existing.length === 0) {
-                    // Insertar solo si no existe
-                    await supabase.insert('transactions', transactionData);
-                }
-            }
+            // Verificar si la transacción ya existe
+            const existing = await supabase.select('transactions', 'id', { transaction_id: transaction.id });
             
-            console.log(`📊 ${transactions.length} transacciones procesadas para ${username}`);
-        } catch (error) {
-            console.warn('Error guardando transacciones en Supabase:', error);
+            if (existing.length === 0) {
+                // Insertar solo si no existe
+                await supabase.insert('transactions', transactionData);
+            }
         }
+        
+        console.log(`📊 ${transactions.length} transacciones procesadas para ${username}`);
+    } catch (error) {
+        console.warn('Error guardando transacciones en Supabase:', error);
     }
+}
+
+// Función para obtener todos los clientes (requerida por account-generator)
+getAllClients() {
+    try {
+        const clientsDatabase = JSON.parse(localStorage.getItem('clientsDatabase') || '{}');
+        return Object.values(clientsDatabase);
+    } catch (error) {
+        console.warn('Error obteniendo clientes:', error);
+        return [];
+    }
+}
 }
 
 // ================== FUNCIONES DE MIGRACIÓN Y VERIFICACIÓN ==================
@@ -650,6 +661,7 @@ window.saveTransactionToSupabase = saveTransactionToSupabase;
 console.log('🔄 Sistema híbrido localStorage + Supabase inicializado');
 
 console.log('📊 Estado:', getHybridSystemStatus());
+
 
 
 
