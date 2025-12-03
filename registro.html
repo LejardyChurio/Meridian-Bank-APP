@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Meridian Banco</title>
+    
+    <!-- Precargar recursos críticos -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"></noscript>
+    
+    <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="css/styles.css" rel="stylesheet"></noscript>
+    
+    <!-- Font Awesome con loading diferido -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"></noscript>
+    
+    <!-- Sistema Híbrido de Base de Datos -->
+    <script src="js/hybrid-storage.js"></script>
+    
+    <!-- Generador de Números de Cuenta Únicos -->
+    <script src="js/account-generator.js"></script>
+    
+    <style>
+        /* Estilos críticos inline para carga inmediata */
+        .registration-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .registration-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        /* Loading spinner optimizado */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .document-type-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .document-option {
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        .document-option:hover {
+            border-color: #667eea;
+            background: #e8f0ff;
+            transform: translateY(-2px);
+        }
+        
+        .document-option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .document-option i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .form-floating label {
+            color: #495057;
+        }
+        
+        .btn-register {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 15px;
+            padding: 15px 40px;
+            font-weight: bold;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row, .document-type-selector {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .registration-card {
+                padding: 20px;
+                margin: 10px;
+            }
+        }
+        
+        .success-message {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .error-message {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .balance-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading overlay para carga rápida -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="registration-container">
+        <div class="registration-card" id="registrationCard">
+            <div class="text-center mb-4">
+                <h2><i class="fas fa-university"></i> Meridian Banco</h2>
+                <h4 class="text-muted">Registro de Nueva Cuenta</h4>
+            </div>
+
+            <!-- Mensaje de éxito -->
+            <div id="successMessage" class="success-message">
+                <h4><i class="fas fa-check-circle"></i> ¡Registro Exitoso!</h4>
+                <p id="successText"></p>
+                <div class="balance-info">
+                    <strong>Cuenta creada con saldo inicial: <span id="initialBalance"></span></strong>
+                </div>
+                <button type="button" class="btn btn-light mt-3" onclick="goToLogin()">
+                    <i class="fas fa-sign-in-alt"></i> Ir al Login
+                </button>
+            </div>
+
+            <!-- Mensaje de error -->
+            <div id="errorMessage" class="error-message"></div>
+
+            <!-- Formulario de registro -->
+            <form id="registrationForm">
+                <!-- Selector de tipo de documento -->
+                <div class="document-type-selector">
+                    <div class="document-option" data-type="V" onclick="selectDocumentType('V')">
+                        <i class="fas fa-user"></i>
+                        <h5>Persona Natural</h5>
+                        <p class="mb-0">Cédula Venezolana (V-)</p>
+                        <small>Saldo inicial: 30.000,00 Bs</small>
+                    </div>
+                    <div class="document-option" data-type="J" onclick="selectDocumentType('J')">
+                        <i class="fas fa-building"></i>
+                        <h5>Persona Jurídica</h5>
+                        <p class="mb-0">RIF Jurídico (J-)</p>
+                        <small>Saldo inicial: 50.000,00 Bs</small>
+                    </div>
+                </div>
+
+                <!-- Datos personales -->
+                <div class="form-row">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="nombres" placeholder="Nombres" required>
+                        <label for="nombres"><i class="fas fa-user"></i> Nombres</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="apellidos" placeholder="Apellidos" required>
+                        <label for="apellidos"><i class="fas fa-user"></i> Apellidos</label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-floating">
+                        <input type="email" class="form-control" id="email" placeholder="Correo Electrónico" required>
+                        <label for="email"><i class="fas fa-envelope"></i> Correo Electrónico</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="tel" class="form-control" id="telefono" placeholder="Teléfono" required>
+                        <label for="telefono"><i class="fas fa-phone"></i> Teléfono</label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="ciudad" placeholder="Ciudad" required>
+                        <label for="ciudad"><i class="fas fa-map-marker-alt"></i> Ciudad</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="documento" placeholder="Número de Documento" required>
+                        <label for="documento"><span id="documentPrefix">-</span> Número de Documento</label>
+                    </div>
+                </div>
+
+                <!-- Datos de acceso -->
+                <h5 class="mt-4 mb-3"><i class="fas fa-key"></i> Datos de Acceso</h5>
+                
+                <div class="form-row">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="usuario" placeholder="Nombre de Usuario" required>
+                        <label for="usuario"><i class="fas fa-user-circle"></i> Nombre de Usuario</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="password" class="form-control" id="password" placeholder="Contraseña" required>
+                        <label for="password"><i class="fas fa-lock"></i> Contraseña</label>
+                    </div>
+                </div>
+
+                <div class="form-floating mb-4">
+                    <input type="password" class="form-control" id="confirmPassword" placeholder="Confirmar Contraseña" required>
+                    <label for="confirmPassword"><i class="fas fa-lock"></i> Confirmar Contraseña</label>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-register">
+                        <i class="fas fa-user-plus"></i> Registrar Cuenta
+                    </button>
+                </div>
+
+                <div class="text-center mt-3">
+                    <a href="index.html" class="text-decoration-none">
+                        <i class="fas fa-arrow-left"></i> Volver al Login
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedDocumentType = '';
+
+        function selectDocumentType(type) {
+            selectedDocumentType = type;
+            
+            // Remover selección anterior
+            document.querySelectorAll('.document-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Agregar selección actual
+            document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+            
+            // Actualizar prefix del documento
+            document.getElementById('documentPrefix').textContent = type + '-';
+        }
+
+        function validateForm() {
+            const form = document.getElementById('registrationForm');
+            const formData = new FormData(form);
+            
+            // Verificar que se haya seleccionado tipo de documento
+            if (!selectedDocumentType) {
+                showError('Debe seleccionar el tipo de documento (Persona Natural o Jurídica)');
+                return false;
+            }
+            
+            // Verificar que las contraseñas coincidan
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                showError('Las contraseñas no coinciden');
+                return false;
+            }
+            
+            // Verificar longitud de contraseña
+            if (password.length < 4) {
+                showError('La contraseña debe tener al menos 4 caracteres');
+                return false;
+            }
+            
+            return true;
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(clientData) {
+            const successDiv = document.getElementById('successMessage');
+            const successText = document.getElementById('successText');
+            const balanceSpan = document.getElementById('initialBalance');
+            
+            const balance = selectedDocumentType === 'V' ? 30000 : 50000;
+            const formattedBalance = new Intl.NumberFormat('es-VE', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(balance);
+            
+            // Formatear número de cuenta para mostrar
+            const formattedAccount = AccountNumberGenerator.formatAccountNumber(clientData.numeroCuenta);
+            
+            successText.innerHTML = `
+                Bienvenido/a <strong>${clientData.nombres} ${clientData.apellidos}</strong><br>
+                Usuario: <strong>${clientData.usuario}</strong><br>
+                Número de Cuenta: <strong>${formattedAccount}</strong><br>
+                Su cuenta ha sido creada exitosamente y ya puede acceder al sistema.
+            `;
+            
+            balanceSpan.textContent = `${formattedBalance} Bs`;
+            
+            // Ocultar formulario y mostrar mensaje de éxito
+            document.getElementById('registrationForm').style.display = 'none';
+            successDiv.style.display = 'block';
+        }
+
+        function goToLogin() {
+            window.location.href = 'index.html';
+        }
+
+        function generateClientId() {
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 1000);
+            return `${selectedDocumentType}${timestamp}${random}`;
+        }
+
+        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!validateForm()) {
+                return;
+            }
+            
+            // Generar número de cuenta único de 20 dígitos (0100 + 16 aleatorios)
+            const accountNumber = AccountNumberGenerator.generateAccountNumber();
+            
+            // Recopilar datos del formulario
+            const formData = {
+                id: generateClientId(),
+                tipoDocumento: selectedDocumentType,
+                documento: document.getElementById('documento').value,
+                numeroCuenta: accountNumber, // Nuevo número de cuenta único
+                nombres: document.getElementById('nombres').value,
+                apellidos: document.getElementById('apellidos').value,
+                email: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value,
+                ciudad: document.getElementById('ciudad').value,
+                usuario: document.getElementById('usuario').value,
+                password: document.getElementById('password').value,
+                saldoCuenta: selectedDocumentType === 'V' ? 30000 : 50000,
+                fechaRegistro: new Date().toISOString(),
+                estado: 'activo'
+            };
+            
+            // Verificar si el usuario ya existe
+            const existingClients = JSON.parse(localStorage.getItem('clientsDatabase')) || {};
+            
+            const userExists = Object.values(existingClients).some(client => 
+                client.usuario === formData.usuario || client.email === formData.email
+            );
+            
+            if (userExists) {
+                showError('El nombre de usuario o correo electrónico ya están registrados');
+                return;
+            }
+            
+            // Guardar cliente usando el sistema híbrido (localStorage + Supabase)
+            await saveNewClient(formData);
+            
+            // Mostrar mensaje de éxito
+            showSuccess(formData);
+        });
+
+        // Formatear teléfono mientras se escribe
+        document.getElementById('telefono').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 0) {
+                if (value.length <= 4) {
+                    value = value.replace(/(\d{4})/, '$1');
+                } else if (value.length <= 7) {
+                    value = value.replace(/(\d{4})(\d{3})/, '$1-$2');
+                } else {
+                    value = value.replace(/(\d{4})(\d{3})(\d{4})/, '$1-$2-$3');
+                }
+            }
+            e.target.value = value;
+        });
+
+        // Formatear documento mientras se escribe
+        document.getElementById('documento').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 8) {
+                value = value.substring(0, 8);
+            }
+            if (value.length > 2) {
+                if (value.length <= 5) {
+                    // Formato XX.XXX
+                    value = value.replace(/(\d{2})(\d{1,3})/, '$1.$2');
+                } else {
+                    // Formato XX.XXX.XXX
+                    value = value.replace(/(\d{2})(\d{3})(\d{1,3})/, '$1.$2.$3');
+                }
+            }
+            e.target.value = value;
+        });
+    </script>
+    
+    <!-- Scripts optimizados para carga diferida -->
+    <script>
+        // Función para cargar scripts de manera asíncrona
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.async = true;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        // Cargar Bootstrap después de que el DOM esté listo
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Ocultar loading y mostrar formulario inmediatamente
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const registrationCard = document.getElementById('registrationCard');
+            
+            setTimeout(() => {
+                if (loadingOverlay) {
+                    loadingOverlay.style.opacity = '0';
+                    setTimeout(() => loadingOverlay.style.display = 'none', 300);
+                }
+                if (registrationCard) {
+                    registrationCard.style.opacity = '1';
+                    registrationCard.style.transform = 'translateY(0)';
+                }
+            }, 200); // Carga súper rápida
+
+            try {
+                await loadScript('https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js');
+                console.log('Bootstrap cargado exitosamente');
+            } catch (error) {
+                console.warn('Error cargando Bootstrap:', error);
+            }
+        });
+        
+        // Función para guardar nuevo cliente usando sistema híbrido
+        async function saveNewClient(clientData) {
+            try {
+                // Convertir datos del formulario al formato esperado por el sistema híbrido
+                const hybridClientData = {
+                    password: clientData.password,
+                    usuario: clientData.usuario,
+                    documento: clientData.documento.replace(/\./g, ''), // Remover puntos del formato
+                    tipoDocumento: clientData.tipoDocumento,
+                    nombres: clientData.nombres,
+                    apellidos: clientData.apellidos,
+                    email: clientData.email,
+                    telefono: clientData.telefono,
+                    ciudad: clientData.ciudad,
+                    numeroCuenta: clientData.numeroCuenta,
+                    saldoCuenta: clientData.saldoCuenta,
+                    fechaRegistro: clientData.fechaRegistro,
+                    estado: clientData.estado,
+                    clientData: {
+                        id: clientData.id,
+                        name: `${clientData.nombres} ${clientData.apellidos}`,
+                        email: clientData.email,
+                        phone: clientData.telefono,
+                        account: {
+                            accountId: `ACC_${clientData.id}_001`,
+                            accountNumber: clientData.numeroCuenta,
+                            accountType: clientData.tipoDocumento === 'V' ? 'Ahorros' : 'Corriente',
+                            balance: clientData.saldoCuenta,
+                            currency: 'VES'
+                        },
+                        creditCard: null,
+                        transactions: []
+                    }
+                };
+
+                // Guardar usando el sistema híbrido (localStorage + Supabase automáticamente)
+                await hybridStorage.saveClient(clientData.usuario, hybridClientData);
+                
+                console.log(`✅ Cliente ${clientData.usuario} registrado en sistema híbrido`);
+                
+                // También mantener el formato original en localStorage para compatibilidad
+                const existingClients = JSON.parse(localStorage.getItem('clientsDatabase')) || {};
+                existingClients[clientData.id] = clientData;
+                localStorage.setItem('clientsDatabase', JSON.stringify(existingClients));
+                
+            } catch (error) {
+                console.error('❌ Error guardando cliente en sistema híbrido:', error);
+                
+                // Fallback: guardar solo en localStorage si falla Supabase
+                const existingClients = JSON.parse(localStorage.getItem('clientsDatabase')) || {};
+                existingClients[clientData.id] = clientData;
+                localStorage.setItem('clientsDatabase', JSON.stringify(existingClients));
+                
+                console.log('⚠️ Cliente guardado solo en localStorage (fallback)');
+            }
+        }
+
+        // Mostrar formulario inmediatamente
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('.registration-card');
+            if (form) {
+                form.style.opacity = '1';
+                form.style.transform = 'translateY(0)';
+                form.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            }
+        });
+    </script>
+</body>
+</html>

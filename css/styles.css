@@ -1,0 +1,483 @@
+/* Estilos generales */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+/* Página de Login */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.login-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 400px;
+}
+
+.bank-logo {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.bank-logo h2 {
+    color: #007bff;
+    margin-bottom: 0.5rem;
+}
+
+.login-btn {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+}
+
+.btn-register-link {
+    border-radius: 25px;
+    padding: 10px 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: 2px solid #28a745;
+    color: white !important;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-register-link:hover {
+    background: linear-gradient(135deg, #218838 0%, #1e9960 100%);
+    border-color: #1e7e34;
+    transform: translateY(-2px);
+    color: white !important;
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+.btn-register-link i {
+    margin-right: 8px;
+}
+
+.demo-credentials {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 0.9em;
+}
+
+/* Transacciones */
+.transactions-table {
+    background: white;
+}
+
+.transaction-amount {
+    color: #212529 !important; /* Negro para todos los montos */
+    font-weight: 600;
+    font-size: 0.95em;
+}
+
+.transaction-row:hover {
+    background-color: #f8f9fa;
+}
+
+/* Tarjetas del dashboard */
+.account-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.account-card:hover {
+    transform: translateY(-5px);
+}
+
+.account-balance {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.account-number {
+    color: #6c757d;
+    font-family: monospace;
+}
+
+.credit-card {
+    background: linear-gradient(135deg, #2c5aa0, #1e3a5f);
+    color: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.credit-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+}
+
+.card-number {
+    font-family: monospace;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    margin: 1rem 0;
+}
+
+.card-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+}
+
+.card-holder {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.card-expiry {
+    font-family: monospace;
+}
+
+.available-credit {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.used-credit {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* Tablas */
+.table th {
+    background-color: #f8f9fa;
+    border-top: none;
+}
+
+/* Alertas y notificaciones */
+.alert-success {
+    border-left: 4px solid #28a745;
+}
+
+.alert-info {
+    border-left: 4px solid #17a2b8;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .credit-card {
+        margin-bottom: 1rem;
+    }
+    
+    .card-details {
+        flex-direction: column;
+        align-items: start;
+        gap: 0.5rem;
+    }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Estados de las tarjetas */
+.card-status {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.status-active {
+    background: rgba(40, 167, 69, 0.2);
+    color: #28a745;
+}
+
+.status-pending {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+}
+
+.status-blocked {
+    background: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+}
+
+/* Nuevos estilos para operaciones de tarjeta */
+.credit-card .btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+}
+
+.credit-card .btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: white;
+}
+
+/* Estilo para formularios en modales */
+.modal-body form {
+    margin-bottom: 0;
+}
+
+.modal-body hr {
+    margin: 1rem 0;
+}
+
+/* Mejor visualización de información de deuda */
+.credit-info .row {
+    margin-bottom: 0.5rem;
+}
+
+.credit-info .progress {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Badges para tipos de transacción */
+.badge.bg-primary {
+    background-color: #0d6efd !important;
+}
+
+.badge.bg-info {
+    background-color: #0dcaf0 !important;
+}
+
+/* Mejorar espaciado en cards de cuenta */
+.account-card .badge {
+    font-size: 0.75rem;
+}
+
+/* Animación suave para cambios de contenido */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Estilo para alertas de información */
+.alert-info .btn {
+    white-space: nowrap;
+}
+
+/* Responsive para tarjetas */
+@media (max-width: 768px) {
+    .credit-card .credit-info .row {
+        margin-bottom: 0.25rem;
+    }
+    
+    .credit-card .credit-info small {
+        font-size: 0.75rem;
+    }
+}
+
+/* Estilos para el botón CVV */
+.cvv-container {
+    display: inline-block;
+    position: relative;
+    margin-left: 10px;
+    width: 80px;
+    height: 35px;
+    perspective: 1000px;
+}
+
+.cvv-front,
+.cvv-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    transition: transform 0.6s;
+    border-radius: 15px;
+}
+
+.cvv-front {
+    transform: rotateY(0deg);
+}
+
+.cvv-back {
+    transform: rotateY(180deg);
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.cvv-container.flipped .cvv-front {
+    transform: rotateY(-180deg);
+}
+
+.cvv-container.flipped .cvv-back {
+    transform: rotateY(0deg);
+}
+
+.cvv-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 15px;
+    color: white;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.cvv-button:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: translateY(-1px);
+}
+
+.cvv-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+    flex: 1;
+}
+
+.cvv-code {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 16px;
+    letter-spacing: 2px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.cvv-hide-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 6px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cvv-hide-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.cvv-button.flipping {
+    animation: flipCVV 0.6s ease-in-out;
+}
+
+
+
+.cvv-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+    margin-bottom: 5px;
+}
+
+.cvv-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: #333;
+}
+
+.cvv-tooltip.visible {
+    opacity: 1;
+}
+
+.cvv-info {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.cvv-info strong {
+    margin-right: 8px;
+}
+
+/* Responsive CVV */
+@media (max-width: 768px) {
+    .cvv-button {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+    
+    .cvv-tooltip {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+}
