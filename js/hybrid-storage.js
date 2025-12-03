@@ -108,9 +108,12 @@ const supabase = new SupabaseClient(SUPABASE_URL, SUPABASE_KEY);
 // Sistema híbrido de persistencia
 class HybridStorage {
     constructor() {
-        this.useSupabase = true; // Activar Supabase por defecto
-        this.fallbackToLocal = true; // Usar localStorage como fallback
-    }
+    this.useSupabase = true; // Activar Supabase por defecto
+    this.fallbackToLocal = true; // Usar localStorage como fallback
+    this.supabaseUrl = SUPABASE_URL;
+    this.supabaseKey = SUPABASE_KEY;
+    this.supabase = new SupabaseClient(SUPABASE_URL, SUPABASE_KEY);
+}
 
     // Guardar cliente (híbrido: Supabase PRIMERO + localStorage)
     async saveClient(username, clientData) {
@@ -649,4 +652,5 @@ window.updateCreditCardInSupabase = updateCreditCardInSupabase;
 window.saveTransactionToSupabase = saveTransactionToSupabase;
 
 console.log('🔄 Sistema híbrido localStorage + Supabase inicializado');
+
 console.log('📊 Estado:', getHybridSystemStatus());
