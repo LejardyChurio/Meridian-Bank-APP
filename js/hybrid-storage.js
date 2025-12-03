@@ -256,8 +256,6 @@ convertToSupabaseFormat(username, localData) {
         bank_code: 'BANCO_2',
         bank_name: 'Meridian Banco',
         status: 'active',
-        fecha_registro: localData.fechaRegistro || new Date().toISOString(),
-        estado: localData.estado || 'activo'
     };
 }
 
@@ -652,5 +650,6 @@ window.saveTransactionToSupabase = saveTransactionToSupabase;
 console.log('🔄 Sistema híbrido localStorage + Supabase inicializado');
 
 console.log('📊 Estado:', getHybridSystemStatus());
+
 
 
