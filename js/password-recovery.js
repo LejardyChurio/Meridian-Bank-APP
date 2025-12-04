@@ -241,12 +241,12 @@ class PasswordRecovery {
             // Actualizar en Supabase
             if (this.hybridStorage.supabase) {
                 const clienteActualizado = clientes[clienteIndex];
-                const supabaseData = this.hybridStorage.convertToSupabaseFormat(clienteActualizado);
                 
+                // Actualizar solo la contraseña en Supabase
                 const { error } = await this.hybridStorage.supabase
-                    .from('clientes')
-                    .update({ password: nuevaPassword })
-                    .eq('email', clienteActualizado.email);
+                    .from('clients')
+                    .update({ password_hash: nuevaPassword })
+                    .eq('username', clienteActualizado.usuario);
 
                 if (error) {
                     console.error('Error al actualizar en Supabase:', error);
