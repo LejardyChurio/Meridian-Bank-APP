@@ -228,7 +228,7 @@ function getCardTypeText(cardType) {
     return typeMap[cardType] || cardType;
 }
 
-function requestNewCard() {
+async function requestNewCard() {
     // Validar que el cliente no tenga ya una tarjeta
     const clientData = getCurrentClient();
     
@@ -240,27 +240,32 @@ function requestNewCard() {
         return;
     }
 
-    // Solicitar nueva tarjeta con límite estándar (Bs. 100,000)
-    const result = requestCreditCard();
+    try {
+        // Solicitar nueva tarjeta con límite estándar (Bs. 100,000)
+        const result = await requestCreditCard();
 
-    if (result.success) {
-        // Cerrar modal
-        const modal = bootstrap.Modal.getInstance(document.getElementById('newCardModal'));
-        modal.hide();
+        if (result.success) {
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('newCardModal'));
+            modal.hide();
 
-        // Mostrar mensaje de éxito
-        showAlert('success', '¡Solicitud enviada! Su nueva tarjeta será activada en unos momentos.');
-        
-        // Recargar página después de 2 segundos para mostrar la tarjeta
-        setTimeout(() => {
-            location.reload();
-        }, 2000);
+            // Mostrar mensaje de éxito
+            showAlert('success', '¡Solicitud enviada! Su nueva tarjeta será activada en unos momentos.');
+            
+            // Recargar página después de 2 segundos para mostrar la tarjeta
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
 
-        // Limpiar formulario
-        document.getElementById('newCardForm').reset();
-        
-    } else {
-        showAlert('error', result.message || 'Error al procesar la solicitud. Intente nuevamente.');
+            // Limpiar formulario
+            document.getElementById('newCardForm').reset();
+            
+        } else {
+            showAlert('error', result.message || 'Error al procesar la solicitud. Intente nuevamente.');
+        }
+    } catch (error) {
+        console.error('Error en requestNewCard:', error);
+        showAlert('error', 'Error al procesar la solicitud. Intente nuevamente.');
     }
 }
 
