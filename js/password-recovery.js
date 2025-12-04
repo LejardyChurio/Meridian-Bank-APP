@@ -137,14 +137,18 @@ class PasswordRecovery {
                 return false;
             }
 
-            // Verificar documento y teléfono
-            const documentoMatch = usuarioEncontrado.documento === documento;
+            // Verificar documento y teléfono (normalizar documento removiendo puntos y espacios)
+            const documentoNormalizado = documento.replace(/[.\s-]/g, '');
+            const documentoRegistradoNormalizado = usuarioEncontrado.documento.replace(/[.\s-]/g, '');
+            const documentoMatch = documentoRegistradoNormalizado === documentoNormalizado;
             const telefonoMatch = usuarioEncontrado.telefono === telefono;
 
             console.log('Verificación de datos:', {
                 usuario: usuario,
                 documentoIngresado: documento,
+                documentoNormalizado: documentoNormalizado,
                 documentoRegistrado: usuarioEncontrado.documento,
+                documentoRegistradoNormalizado: documentoRegistradoNormalizado,
                 documentoMatch,
                 telefonoIngresado: telefono,
                 telefonoRegistrado: usuarioEncontrado.telefono,
