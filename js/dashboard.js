@@ -231,7 +231,11 @@ function getCardTypeText(cardType) {
 function requestNewCard() {
     // Validar que el cliente no tenga ya una tarjeta
     const clientData = getCurrentClient();
-    if (clientData && clientData.creditCard) {
+    
+    // VALIDACIÓN: Verificar que la tarjeta realmente existe y está activa
+    if (clientData && clientData.creditCard && 
+        clientData.creditCard.status === 'active' && 
+        clientData.creditCard.cardNumber) {
         showAlert('error', 'Ya tienes una tarjeta de crédito activa. Solo puedes tener una tarjeta por cuenta.');
         return;
     }
@@ -644,6 +648,51 @@ function processSettlements() {
     const updatedClientData = getCurrentClient();
     console.log('Datos actualizados del cliente:', updatedClientData);
     loadTransactions(updatedClientData.transactions);
+}
+
+// DEBUG: Función para verificar usuario en Supabase
+async function checkUserInSupabase(userIdentifier) {
+    try {
+        console.log('🔍 Buscando usuario en Supabase:', userIdentifier);
+        
+        // Intentar consulta a Supabase directamente
+        const hybridStorage = new HybridStorage();
+        const clientes = await hybridStorage.getAllClients();
+        
+        const usuario = clientes.find(c => 
+            c.email === userIdentifier || 
+            c.name === userIdentifier ||
+            c.usuario === userIdentifier
+        );
+        
+        if (usuario) {
+            console.log('🔍 Usuario encontrado en Supabase:', usuario);
+            console.log('🔍 CreditCard en Supabase:', usuario.creditCard || 'null/undefined');
+        } else {
+            console.log('🔍 Usuario NO encontrado en Supabase');
+        }
+        
+        // También verificar tabla credit_cards si existe
+        if (hybridStorage.supabase) {
+            const response = await fetch(`${hybridStorage.supabase.url}/rest/v1/credit_cards?select=*`, {
+                headers: hybridStorage.supabase.headers
+            });
+            if (response.ok) {
+                const creditCards = await response.json();
+                console.log('🔍 Todas las credit_cards en Supabase:', creditCards);
+                
+                const userCard = creditCards.find(card => 
+                    card.username === userIdentifier || 
+                    card.user_email === userIdentifier
+                );
+                if (userCard) {
+                    console.log('🔍 Tarjeta encontrada en tabla credit_cards:', userCard);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('🔍 Error consultando Supabase:', error);
+    }
     loadCreditCard(updatedClientData.creditCard);
     checkPendingSettlements(); // Actualizar botones de liquidación
 }
