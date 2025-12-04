@@ -108,12 +108,12 @@ const supabase = new SupabaseClient(SUPABASE_URL, SUPABASE_KEY);
 // Sistema híbrido de persistencia
 class HybridStorage {
     constructor() {
-    this.useSupabase = true; // Activar Supabase por defecto
-    this.fallbackToLocal = true; // Usar localStorage como fallback
-    this.supabaseUrl = SUPABASE_URL;
-    this.supabaseKey = SUPABASE_KEY;
-    this.supabase = new SupabaseClient(SUPABASE_URL, SUPABASE_KEY);
-}
+        this.useSupabase = true; // Activar Supabase por defecto
+        this.fallbackToLocal = true; // Usar localStorage como fallback
+        this.supabaseUrl = SUPABASE_URL;
+        this.supabaseKey = SUPABASE_KEY;
+        this.supabase = new SupabaseClient(SUPABASE_URL, SUPABASE_KEY);
+    }
 
     // Guardar cliente (híbrido: Supabase PRIMERO + localStorage)
     async saveClient(username, clientData) {
@@ -237,27 +237,27 @@ class HybridStorage {
     }
 
     // Convertir de localStorage a Supabase
-convertToSupabaseFormat(username, localData) {
-    const clientData = localData.clientData;
-    const [nombres, ...apellidosArray] = clientData.name.split(' ');
-    const apellidos = apellidosArray.join(' ');
+    convertToSupabaseFormat(username, localData) {
+        const clientData = localData.clientData;
+        const [nombres, ...apellidosArray] = clientData.name.split(' ');
+        const apellidos = apellidosArray.join(' ');
 
-    return {
-        username: username,
-        password_hash: localData.password,
-        document_type: localData.tipoDocumento || 'V',
-        document_number: localData.documento ? localData.documento.replace(/\./g, '') : 'N/A',
-        account_number: clientData.account.accountNumber,
-        nombres: nombres,
-        apellidos: apellidos,
-        email: clientData.email,
-        telefono: clientData.phone,
-        saldo_cuenta: clientData.account.balance,
-        bank_code: 'BANCO_2',
-        bank_name: 'Meridian Banco',
-        status: 'active',
-    };
-}
+        return {
+            username: username,
+            password_hash: localData.password,
+            document_type: localData.tipoDocumento || 'V',
+            document_number: localData.documento ? localData.documento.replace(/\./g, '') : 'N/A',
+            account_number: clientData.account.accountNumber,
+            nombres: nombres,
+            apellidos: apellidos,
+            email: clientData.email,
+            telefono: clientData.phone,
+            saldo_cuenta: clientData.account.balance,
+            bank_code: 'BANCO_2',
+            bank_name: 'Meridian Banco',
+            status: 'active'
+        };
+    }
 
     // Convertir de Supabase a localStorage
     convertFromSupabaseFormat(supabaseData) {
@@ -296,9 +296,12 @@ convertToSupabaseFormat(username, localData) {
     // Guardar tarjeta de crédito en Supabase
     async saveCreditCardToSupabase(username, creditCard) {
         try {
-            // Obtener ID del cliente
+            // Obtener ID del cliente desde la tabla clients 
             const clients = await supabase.select('clients', 'id', { username: username });
-            if (clients.length === 0) return;
+            if (clients.length === 0) {
+                console.warn('Cliente no encontrado en Supabase para guardar tarjeta:', username);
+                return;
+            }
 
             const clientId = clients[0].id;
             
@@ -306,23 +309,26 @@ convertToSupabaseFormat(username, localData) {
                 client_id: clientId,
                 card_id: creditCard.cardId,
                 card_number: creditCard.cardNumber,
-                card_type: creditCard.cardType,
-                holder_name: creditCard.holderName,
-                expiry_date: creditCard.expiryDate,
+                card_type: creditCard.cardType || 'standard',
+                holder_name: creditCard.holderName || username,
+                expiry_date: creditCard.expirationDate || creditCard.expiryDate,
                 cvv: creditCard.cvv,
-                credit_limit: creditCard.creditLimit,
-                current_balance: creditCard.currentBalance,
-                available_credit: creditCard.availableCredit,
-                status: creditCard.status,
-                account_id: creditCard.accountId
+                credit_limit: parseFloat(creditCard.creditLimit),
+                current_balance: parseFloat(creditCard.currentBalance),
+                available_credit: parseFloat(creditCard.availableCredit),
+                status: creditCard.status || 'active'
             };
+
+            console.log('💾 Datos de tarjeta a insertar:', cardData);
 
             // Verificar si la tarjeta ya existe
             const existing = await supabase.select('credit_cards', 'id', { card_id: creditCard.cardId });
             
             if (existing.length > 0) {
+                console.log('🔄 Actualizando tarjeta existente');
                 await supabase.update('credit_cards', cardData, { card_id: creditCard.cardId });
             } else {
+                console.log('➕ Insertando nueva tarjeta');
                 await supabase.insert('credit_cards', cardData);
             }
         } catch (error) {
@@ -330,55 +336,55 @@ convertToSupabaseFormat(username, localData) {
         }
     }
 
-   // Guardar transacciones en Supabase
-async saveTransactionsToSupabase(username, transactions) {
-    try {
-        // Obtener ID del cliente
-        const clients = await supabase.select('clients', 'id', { username: username });
-        if (clients.length === 0) return;
+    // Guardar transacciones en Supabase
+    async saveTransactionsToSupabase(username, transactions) {
+        try {
+            // Obtener ID del cliente
+            const clients = await supabase.select('clients', 'id', { username: username });
+            if (clients.length === 0) return;
 
-        const clientId = clients[0].id;
+            const clientId = clients[0].id;
 
-        // Procesar cada transacción
-        for (const transaction of transactions) {
-            const transactionData = {
-                client_id: clientId,
-                transaction_id: transaction.id,
-                date: transaction.date,
-                description: transaction.description,
-                amount: transaction.amount,
-                transaction_type: transaction.type,
-                reference: transaction.reference,
-                account_id: transaction.accountId,
-                auth_code: transaction.authCode || null,
-                status: 'completed'
-            };
+            // Procesar cada transacción
+            for (const transaction of transactions) {
+                const transactionData = {
+                    client_id: clientId,
+                    transaction_id: transaction.id,
+                    date: transaction.date,
+                    description: transaction.description,
+                    amount: transaction.amount,
+                    transaction_type: transaction.type,
+                    reference: transaction.reference,
+                    account_id: transaction.accountId,
+                    auth_code: transaction.authCode || null,
+                    status: 'completed'
+                };
 
-            // Verificar si la transacción ya existe
-            const existing = await supabase.select('transactions', 'id', { transaction_id: transaction.id });
-            
-            if (existing.length === 0) {
-                // Insertar solo si no existe
-                await supabase.insert('transactions', transactionData);
+                // Verificar si la transacción ya existe
+                const existing = await supabase.select('transactions', 'id', { transaction_id: transaction.id });
+                
+                if (existing.length === 0) {
+                    // Insertar solo si no existe
+                    await supabase.insert('transactions', transactionData);
+                }
             }
+            
+            console.log(`📊 ${transactions.length} transacciones procesadas para ${username}`);
+        } catch (error) {
+            console.warn('Error guardando transacciones en Supabase:', error);
         }
-        
-        console.log(`📊 ${transactions.length} transacciones procesadas para ${username}`);
-    } catch (error) {
-        console.warn('Error guardando transacciones en Supabase:', error);
     }
-}
 
-// Función para obtener todos los clientes (requerida por account-generator)
-getAllClients() {
-    try {
-        const clientsDatabase = JSON.parse(localStorage.getItem('clientsDatabase') || '{}');
-        return Object.values(clientsDatabase);
-    } catch (error) {
-        console.warn('Error obteniendo clientes:', error);
-        return [];
+    // Función para obtener todos los clientes (requerida por account-generator)
+    getAllClients() {
+        try {
+            const clientsDatabase = JSON.parse(localStorage.getItem('clientsDatabase') || '{}');
+            return Object.values(clientsDatabase);
+        } catch (error) {
+            console.warn('Error obteniendo clientes:', error);
+            return [];
+        }
     }
-}
 }
 
 // ================== FUNCIONES DE MIGRACIÓN Y VERIFICACIÓN ==================
@@ -659,9 +665,4 @@ window.updateCreditCardInSupabase = updateCreditCardInSupabase;
 window.saveTransactionToSupabase = saveTransactionToSupabase;
 
 console.log('🔄 Sistema híbrido localStorage + Supabase inicializado');
-
 console.log('📊 Estado:', getHybridSystemStatus());
-
-
-
-
