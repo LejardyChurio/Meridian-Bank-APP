@@ -233,7 +233,34 @@ class HybridStorage {
         const supabaseClient = clients[0];
         
         // Convertir formato Supabase a localStorage
-        return this.convertFromSupabaseFormat(supabaseClient);
+        const clientData = this.convertFromSupabaseFormat(supabaseClient);
+        
+        // CARGAR TARJETA DE CRÉDITO DESDE TABLA SEPARADA
+        try {
+            const creditCards = await supabase.select('credit_cards', '*', { client_id: supabaseClient.id });
+            if (creditCards && creditCards.length > 0) {
+                const cardData = creditCards[0];
+                clientData.clientData.creditCard = {
+                    cardId: cardData.card_id,
+                    cardNumber: cardData.card_number,
+                    cardType: cardData.card_type,
+                    holderName: cardData.holder_name,
+                    expiryDate: cardData.expiry_date,
+                    cvv: cardData.cvv,
+                    creditLimit: parseFloat(cardData.credit_limit),
+                    currentBalance: parseFloat(cardData.current_balance),
+                    availableCredit: parseFloat(cardData.available_credit),
+                    status: cardData.status
+                };
+                console.log('✅ Tarjeta de crédito cargada desde Supabase:', clientData.clientData.creditCard);
+            } else {
+                console.log('ℹ️ No se encontró tarjeta de crédito para el usuario:', username);
+            }
+        } catch (cardError) {
+            console.warn('⚠️ Error cargando tarjeta de crédito:', cardError);
+        }
+        
+        return clientData;
     }
 
     // Convertir de localStorage a Supabase
@@ -296,7 +323,7 @@ class HybridStorage {
     // Guardar tarjeta de crédito en Supabase
     async saveCreditCardToSupabase(username, creditCard) {
         try {
-            // Obtener ID del cliente desde la tabla clients 
+            // Obtener ID del cliente desde la tabla clients (no clientes)
             const clients = await supabase.select('clients', 'id', { username: username });
             if (clients.length === 0) {
                 console.warn('Cliente no encontrado en Supabase para guardar tarjeta:', username);
