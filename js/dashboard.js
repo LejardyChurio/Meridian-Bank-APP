@@ -251,11 +251,10 @@ function requestNewCard() {
         // Mostrar mensaje de éxito
         showAlert('success', '¡Solicitud enviada! Su nueva tarjeta será activada en unos momentos.');
         
-        // Recargar el dashboard después de un momento
+        // Recargar página después de 2 segundos para mostrar la tarjeta
         setTimeout(() => {
-            const updatedClientData = getCurrentClient();
-            loadCreditCard(updatedClientData.creditCard);
-        }, 500);
+            location.reload();
+        }, 2000);
 
         // Limpiar formulario
         document.getElementById('newCardForm').reset();
