@@ -243,13 +243,15 @@ class PasswordRecovery {
                 const clienteActualizado = clientes[clienteIndex];
                 
                 // Actualizar solo la contraseña en Supabase
-                const { error } = await this.hybridStorage.supabase
-                    .from('clients')
-                    .update({ password_hash: nuevaPassword })
-                    .eq('username', clienteActualizado.usuario);
-
-                if (error) {
-                    console.error('Error al actualizar en Supabase:', error);
+                try {
+                    await this.hybridStorage.supabase.update(
+                        'clients', 
+                        { password_hash: nuevaPassword }, 
+                        { username: clienteActualizado.usuario }
+                    );
+                    console.log('Contraseña actualizada en Supabase exitosamente');
+                } catch (supabaseError) {
+                    console.error('Error al actualizar en Supabase:', supabaseError);
                     // Continuar aunque falle Supabase, localStorage ya tiene el dato actualizado
                 }
             }
