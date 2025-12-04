@@ -232,7 +232,10 @@ async function requestCreditCard() {
         return { success: false, message: 'No hay sesión activa' };
     }
     
-    if (clientData.creditCard && clientData.creditCard.status === 'active') {
+    // VALIDACIÓN: Verificar que realmente no tenga tarjeta activa
+    if (clientData.creditCard && 
+        clientData.creditCard.status === 'active' && 
+        clientData.creditCard.cardNumber) {
         return { success: false, message: 'Ya tienes una tarjeta de crédito activa' };
     }
     
@@ -245,7 +248,9 @@ async function requestCreditCard() {
         creditLimit: 50000.00,
         currentBalance: 0.00,
         availableCredit: 50000.00,
-        status: 'active'
+        status: 'active',
+        holderName: clientData.name || clientData.usuario || 'TITULAR',
+        cardType: 'standard'
     };
     
     clientData.creditCard = newCard;
@@ -253,14 +258,26 @@ async function requestCreditCard() {
     // Actualizar sesión
     sessionStorage.setItem('clientData', JSON.stringify(clientData));
     
-    // Guardar en sistema híbrido si está disponible
+    // Guardar en sistema híbrido
     const currentUser = sessionStorage.getItem('currentUser');
-    if (typeof saveCreditCardHybrid !== 'undefined') {
+    try {
+        console.log('💾 Guardando tarjeta en sistema híbrido...');
+        const hybridStorage = new HybridStorage();
+        
+        // Actualizar datos completos del cliente
         try {
-            await saveCreditCardHybrid(currentUser, clientData);
-        } catch (error) {
-            console.warn('Error guardando en sistema híbrido:', error);
+            await hybridStorage.saveClient(currentUser, clientData);
+        } catch (saveClientError) {
+            console.warn('⚠️ Error guardando cliente completo (continuando):', saveClientError);
         }
+        
+        // Guardar específicamente la tarjeta de crédito
+        await hybridStorage.saveCreditCardToSupabase(currentUser, newCard);
+        
+        console.log('✅ Tarjeta guardada exitosamente en Supabase');
+    } catch (error) {
+        console.error('❌ Error guardando tarjeta en sistema híbrido:', error);
+        // No lanzar error ya que la tarjeta se creó localmente
     }
     
     return { success: true, card: newCard };
