@@ -242,7 +242,7 @@ async function requestCreditCard() {
     // Generar nueva tarjeta
     const newCard = {
         cardId: `CARD_${Date.now()}`,
-        cardNumber: generateCardNumber(),
+        cardNumber: await generateCardNumber(),
         expirationDate: generateExpirationDate(),
         cvv: generateCVV(),
         creditLimit: 50000.00,
@@ -387,8 +387,19 @@ async function payCreditCard(amount) {
 }
 
 // Funciones auxiliares
-function generateCardNumber() {
-    return '4567-1234-5678-' + String(Math.floor(Math.random() * 9000) + 1000);
+//function generateCardNumber() {
+//    return '4567-1234-5678-' + String(Math.floor(Math.random() * 9000) + 1000);
+
+async function generateCardNumber() {
+    let cardNumber;
+    let exists = true;
+    while (exists) {
+        cardNumber = '4567-1234-5678-' + String(Math.floor(Math.random() * 9000) + 1000);
+        // Consultar en Supabase si ya existe
+        const result = await supabase.select('credit_cards', 'id', { card_number: cardNumber });
+        exists = result.length > 0;
+    }
+    return cardNumber;
 }
 
 function generateExpirationDate() {
@@ -424,3 +435,4 @@ window.payCreditCard = payCreditCard;
 window.formatCurrency = formatCurrency;
 
 console.log('🎯 Auth.js simplificado cargado completamente');
+
