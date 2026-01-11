@@ -394,7 +394,8 @@ async function generateCardNumber() {
     let cardNumber;
     let exists = true;
     while (exists) {
-        cardNumber = '4567-1234-5678-' + String(Math.floor(Math.random() * 9000) + 1000);
+        //cardNumber = '4567-1234-5678-' + String(Math.floor(Math.random() * 9000) + 1000);
+        cardNumber = '4567-1234-5678-6947';
         // Consultar en Supabase si ya existe
         const result = await supabase.select('credit_cards', 'id', { card_number: cardNumber });
         exists = result.length > 0;
@@ -435,4 +436,5 @@ window.payCreditCard = payCreditCard;
 window.formatCurrency = formatCurrency;
 
 console.log('🎯 Auth.js simplificado cargado completamente');
+
 
