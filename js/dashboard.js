@@ -7,14 +7,25 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    const clientData = getCurrentClient();
-    if (!clientData) {
+    // Obtener el usuario actual
+    const currentUser = sessionStorage.getItem('currentUser');
+    if (!currentUser) {
         logout();
         return;
     }
 
-    // Inicializar dashboard
-    initializeDashboard(clientData);
+    // Cargar datos del cliente desde Supabase/localStorage (híbrido)
+    loadClientDataFromPersistentStorage(currentUser).then(clientData => {
+        if (!clientData) {
+            logout();
+            return;
+        }
+        // Inicializar dashboard con datos actualizados (incluye transacciones de Supabase)
+        initializeDashboard(clientData.clientData || clientData);
+    }).catch(err => {
+        console.error('Error cargando datos del cliente:', err);
+        logout();
+    });
 });
 
 function initializeDashboard(clientData) {
