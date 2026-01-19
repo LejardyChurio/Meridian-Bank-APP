@@ -347,6 +347,57 @@ async function processPurchase() {
     if (result.success) {
         showAlert('success', `Compra procesada exitosamente. Monto: ${formatCurrency(amount)}`);
 
+        // 1. Actualizar saldo de la tarjeta con los datos devueltos
+        if (result.updatedCard) {
+            clientData.creditCard = result.updatedCard;
+        }
+
+        // 2. Agregar la transacción al historial local
+        if (result.transaction) {
+            if (!clientData.transactions) clientData.transactions = [];
+            clientData.transactions.unshift(result.transaction);
+        }
+
+
+        // 3. Guardar la transacción en Supabase
+        if (typeof saveTransactionToSupabase === 'function') {
+            try {
+                await saveTransactionToSupabase(clientData.usuario || clientData.name || clientData.email, result.transaction);
+                console.log('[Supabase] Transacción guardada en Supabase:', result.transaction);
+            } catch (err) {
+                console.warn('[Supabase] Error al guardar en Supabase:', err);
+            }
+        } else {
+            console.warn('[Supabase] saveTransactionToSupabase no está definida');
+        }
+
+        // 3b. Actualizar saldo de la tarjeta en Supabase
+        if (result.updatedCard && typeof updateCreditCardInSupabase === 'function') {
+            try {
+                await updateCreditCardInSupabase(result.updatedCard);
+                console.log('[Supabase] Saldo de tarjeta actualizado en Supabase:', result.updatedCard);
+            } catch (err) {
+                console.warn('[Supabase] Error al actualizar tarjeta en Supabase:', err);
+            }
+        } else if (result.updatedCard) {
+            console.warn('[Supabase] updateCreditCardInSupabase no está definida');
+        }
+
+        // 4. Guardar los cambios en localStorage/sessionStorage
+        try {
+            const currentUser = sessionStorage.getItem('currentUser');
+            if (currentUser) {
+                let clientsDatabase = JSON.parse(localStorage.getItem('clientsDatabase')) || {};
+                if (clientsDatabase[currentUser]) {
+                    clientsDatabase[currentUser].clientData = clientData;
+                    localStorage.setItem('clientsDatabase', JSON.stringify(clientsDatabase));
+                }
+                sessionStorage.setItem('clientData', JSON.stringify(clientData));
+            }
+        } catch (err) {
+            console.warn('[Depuración] Error guardando datos local/session:', err);
+        }
+
         // Actualizar la vista
         loadAccount(clientData.account);
         loadCreditCard(clientData.creditCard);
