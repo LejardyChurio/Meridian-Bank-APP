@@ -358,11 +358,13 @@ async function processPurchase() {
             clientData.transactions.unshift(result.transaction);
         }
 
+        // Obtener username seguro
+        const username = clientData.usuario || sessionStorage.getItem('currentUser');
 
         // 3. Guardar la transacción en Supabase
         if (typeof saveTransactionToSupabase === 'function') {
             try {
-                await saveTransactionToSupabase(clientData.usuario || clientData.name || clientData.email, result.transaction);
+                await saveTransactionToSupabase(username, result.transaction);
                 console.log('[Supabase] Transacción guardada en Supabase:', result.transaction);
             } catch (err) {
                 console.warn('[Supabase] Error al guardar en Supabase:', err);
@@ -374,7 +376,7 @@ async function processPurchase() {
         // 3b. Actualizar saldo de la tarjeta en Supabase
         if (result.updatedCard && typeof updateCreditCardInSupabase === 'function') {
             try {
-                await updateCreditCardInSupabase(result.updatedCard);
+                await updateCreditCardInSupabase(username, result.updatedCard);
                 console.log('[Supabase] Saldo de tarjeta actualizado en Supabase:', result.updatedCard);
             } catch (err) {
                 console.warn('[Supabase] Error al actualizar tarjeta en Supabase:', err);
@@ -385,11 +387,10 @@ async function processPurchase() {
 
         // 4. Guardar los cambios en localStorage/sessionStorage
         try {
-            const currentUser = sessionStorage.getItem('currentUser');
-            if (currentUser) {
+            if (username) {
                 let clientsDatabase = JSON.parse(localStorage.getItem('clientsDatabase')) || {};
-                if (clientsDatabase[currentUser]) {
-                    clientsDatabase[currentUser].clientData = clientData;
+                if (clientsDatabase[username]) {
+                    clientsDatabase[username].clientData = clientData;
                     localStorage.setItem('clientsDatabase', JSON.stringify(clientsDatabase));
                 }
                 sessionStorage.setItem('clientData', JSON.stringify(clientData));
