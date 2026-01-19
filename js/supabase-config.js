@@ -14,7 +14,7 @@ let supabaseClient = null;
 // Configuración del modo de base de datos
 const DATABASE_CONFIG = {
     // Cambiar a true para usar Supabase, false para localStorage
-    USE_SUPABASE: false, // Empezar con false para migración gradual
+    USE_SUPABASE: true, // Empezar con false para migración gradual
     FALLBACK_TO_LOCALSTORAGE: true // Si falla Supabase, usar localStorage
 };
 
@@ -247,4 +247,5 @@ window.testSupabaseConnection = testSupabaseConnection;
 window.initializeSupabase = initializeSupabase;
 
 console.log('📊 Configuración de base de datos híbrida cargada');
+
 console.log('🔧 Usar dbManager.toggleDatabase(true) para activar Supabase');
