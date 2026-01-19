@@ -118,7 +118,7 @@ class HybridStorage {
     // Guardar cliente (híbrido: Supabase PRIMERO + localStorage)
     async saveClient(username, clientData) {
         let supabaseSuccess = false;
-        
+
         // SIEMPRE intentar guardar en Supabase PRIMERO (principal)
         if (this.useSupabase) {
             try {
@@ -132,7 +132,7 @@ class HybridStorage {
 
         // Guardar en localStorage como respaldo
         this.saveToLocalStorage(username, clientData);
-        
+
         if (supabaseSuccess) {
             console.log(`✅ Cliente ${username} guardado en Supabase + localStorage`);
         } else {
