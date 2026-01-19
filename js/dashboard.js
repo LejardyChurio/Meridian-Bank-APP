@@ -317,7 +317,7 @@ function processCardPayment() {
     }
 }
 
-function processPurchase() {
+async function processPurchase() {
     const amount = parseFloat(document.getElementById('purchaseAmount').value);
     const description = document.getElementById('purchaseDescription').value || 'Compra con tarjeta de crédito';
 
@@ -341,7 +341,7 @@ function processPurchase() {
     }
 
     // Procesar compra
-    const result = useCreditCard(amount, description);
+    const result = await useCreditCard(amount, description);
     console.log('[Depuración] Resultado de useCreditCard:', result);
 
     if (result.success) {
