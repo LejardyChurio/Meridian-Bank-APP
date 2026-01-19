@@ -355,10 +355,13 @@ async function processCardPayment() {
         // Actualizar saldo de la cuenta principal en Supabase
         if (window.hybridStorage && typeof window.hybridStorage.saveClient === 'function') {
             try {
+                // Log para depuración del saldo antes de guardar
+                console.log('[Depuración] Saldo que se va a guardar en Supabase:', clientData.account.balance);
                 await window.hybridStorage.saveClient(username, getCurrentClient());
                 console.log('[Supabase] Cuenta principal actualizada en Supabase:', clientData.account);
             } catch (err) {
-                console.warn('[Supabase] Error al actualizar cuenta en Supabase:', err);
+                console.error('[Supabase] Error al actualizar cuenta en Supabase:', err);
+                showAlert('error', 'Error al guardar el saldo en Supabase: ' + (err.message || err));
             }
         }
 
