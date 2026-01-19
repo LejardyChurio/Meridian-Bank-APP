@@ -325,6 +325,13 @@ async function processCardPayment() {
         const clientData = getCurrentClient();
         const username = clientData.usuario || sessionStorage.getItem('currentUser');
 
+        // Descontar el monto de la cuenta principal
+        if (clientData.account && typeof clientData.account.balance === 'number') {
+            clientData.account.balance -= amount;
+            if (clientData.account.balance < 0) clientData.account.balance = 0;
+        }
+
+
         // Guardar la transacción en Supabase
         if (typeof saveTransactionToSupabase === 'function') {
             try {
@@ -343,6 +350,30 @@ async function processCardPayment() {
             } catch (err) {
                 console.warn('[Supabase] Error al actualizar tarjeta en Supabase:', err);
             }
+        }
+
+        // Actualizar saldo de la cuenta principal en Supabase
+        if (window.hybridStorage && typeof window.hybridStorage.saveClient === 'function') {
+            try {
+                await window.hybridStorage.saveClient(username, getCurrentClient());
+                console.log('[Supabase] Cuenta principal actualizada en Supabase:', clientData.account);
+            } catch (err) {
+                console.warn('[Supabase] Error al actualizar cuenta en Supabase:', err);
+            }
+        }
+
+        // Guardar los cambios en localStorage/sessionStorage
+        try {
+            if (username) {
+                let clientsDatabase = JSON.parse(localStorage.getItem('clientsDatabase')) || {};
+                if (clientsDatabase[username]) {
+                    clientsDatabase[username].clientData = clientData;
+                    localStorage.setItem('clientsDatabase', JSON.stringify(clientsDatabase));
+                }
+                sessionStorage.setItem('clientData', JSON.stringify(clientData));
+            }
+        } catch (err) {
+            console.warn('[Depuración] Error guardando datos local/session:', err);
         }
 
         // Refrescar historial de transacciones desde Supabase
