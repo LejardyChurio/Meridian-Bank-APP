@@ -199,23 +199,24 @@ class HybridStorage {
     async saveToSupabase(username, clientData) {
         // Convertir formato localStorage a Supabase
         const supabaseData = this.convertToSupabaseFormat(username, clientData);
-        
         // Verificar si el cliente ya existe
-        const existing = await supabase.select('clients', 'id', { username: username });
-        
+        const existing = await supabase.select('clients', '*', { username: username });
         if (existing.length > 0) {
-            // Actualizar cliente existente
-            await supabase.update('clients', supabaseData, { username: username });
+            // Solo actualizar saldo_cuenta y campos permitidos, NO document_number ni otros sensibles
+            const updateFields = {
+                saldo_cuenta: supabaseData.saldo_cuenta,
+                // Puedes agregar otros campos que sí quieras actualizar aquí
+                // updated_at: new Date().toISOString()
+            };
+            await supabase.update('clients', updateFields, { username: username });
         } else {
-            // Insertar nuevo cliente
+            // Insertar nuevo cliente (incluye document_number si es la primera vez)
             await supabase.insert('clients', supabaseData);
         }
-
         // Guardar tarjeta de crédito si existe
         if (clientData.clientData && clientData.clientData.creditCard) {
             await this.saveCreditCardToSupabase(username, clientData.clientData.creditCard);
         }
-
         // Guardar transacciones si existen
         if (clientData.clientData && clientData.clientData.transactions && clientData.clientData.transactions.length > 0) {
             await this.saveTransactionsToSupabase(username, clientData.clientData.transactions);
