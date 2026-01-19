@@ -355,8 +355,8 @@ async function processCardPayment() {
         // Actualizar saldo de la cuenta principal en Supabase
         if (window.hybridStorage && typeof window.hybridStorage.saveClient === 'function') {
             try {
-                const clientToSave = getCurrentClient();
-                await window.hybridStorage.saveClient(username, clientToSave);
+                // Usar el mismo objeto clientData modificado, no volver a llamar getCurrentClient
+                await window.hybridStorage.saveClient(username, clientData);
                 console.log('[Supabase] Cuenta principal actualizada en Supabase:', clientData.account);
             } catch (err) {
                 console.error('[Supabase] Error al actualizar cuenta en Supabase:', err);
