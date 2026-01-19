@@ -234,7 +234,7 @@ class HybridStorage {
         
         // Convertir formato Supabase a localStorage
         const clientData = this.convertFromSupabaseFormat(supabaseClient);
-        
+
         // CARGAR TARJETA DE CRÉDITO DESDE TABLA SEPARADA
         try {
             const creditCards = await supabase.select('credit_cards', '*', { client_id: supabaseClient.id });
@@ -259,7 +259,34 @@ class HybridStorage {
         } catch (cardError) {
             console.warn('⚠️ Error cargando tarjeta de crédito:', cardError);
         }
-        
+
+        // CARGAR TRANSACCIONES DESDE TABLA SEPARADA
+        try {
+            const transactions = await supabase.select('transactions', '*', { client_id: supabaseClient.id });
+            if (transactions && transactions.length > 0) {
+                // Mapear formato para frontend si es necesario
+                clientData.clientData.transactions = transactions.map(tx => ({
+                    id: tx.transaction_id,
+                    date: tx.date,
+                    description: tx.description,
+                    amount: parseFloat(tx.amount),
+                    type: tx.transaction_type,
+                    reference: tx.reference,
+                    accountId: tx.account_id,
+                    authCode: tx.auth_code,
+                    status: tx.status,
+                    displayTime: tx.date // Puedes ajustar el formato si lo necesitas
+                }));
+                console.log(`✅ ${transactions.length} transacciones cargadas desde Supabase para ${username}`);
+            } else {
+                clientData.clientData.transactions = [];
+                console.log('ℹ️ No se encontraron transacciones para el usuario:', username);
+            }
+        } catch (txError) {
+            clientData.clientData.transactions = [];
+            console.warn('⚠️ Error cargando transacciones:', txError);
+        }
+
         return clientData;
     }
 
