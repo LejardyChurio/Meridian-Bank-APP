@@ -355,22 +355,8 @@ async function processCardPayment() {
         // Actualizar saldo de la cuenta principal en Supabase
         if (window.hybridStorage && typeof window.hybridStorage.saveClient === 'function') {
             try {
-                // Unificar y robustecer el wrapper con todos los campos requeridos
-                let clientsDatabase = JSON.parse(localStorage.getItem('clientsDatabase')) || {};
-                let clientWrapper = clientsDatabase[username];
                 const clientToSave = getCurrentClient();
-                const wrapper = {
-                    password: clientWrapper ? clientWrapper.password : '',
-                    usuario: username,
-                    tipoDocumento: clientToSave.tipoDocumento || clientToSave.account?.tipoDocumento || '',
-                    documento: clientToSave.documento || clientToSave.account?.documento || '',
-                    email: clientToSave.email || '',
-                    clientData: clientToSave,
-                    saldo_cuenta: clientToSave.account && typeof clientToSave.account.balance === 'number'
-                        ? clientToSave.account.balance : 0
-                };
-                console.log('[Depuración] Wrapper unificado enviado a saveClient:', wrapper);
-                await window.hybridStorage.saveClient(username, wrapper);
+                await window.hybridStorage.saveClient(username, clientToSave);
                 console.log('[Supabase] Cuenta principal actualizada en Supabase:', clientData.account);
             } catch (err) {
                 console.error('[Supabase] Error al actualizar cuenta en Supabase:', err);
@@ -807,20 +793,8 @@ function processSettlements() {
     // Actualizar también la persistencia
     const currentUser = sessionStorage.getItem('currentUser');
     if (currentUser) {
-        // Unificar y robustecer el wrapper para persistencia con todos los campos requeridos
-        let clientWrapper = clientsDatabase[currentUser];
         const clientToSave = clientsDatabase[clientKey].clientData;
-        const wrapper = {
-            password: clientWrapper ? clientWrapper.password : '',
-            usuario: currentUser,
-            tipoDocumento: clientToSave.tipoDocumento || clientToSave.account?.tipoDocumento || '',
-            documento: clientToSave.documento || clientToSave.account?.documento || '',
-            email: clientToSave.email || '',
-            clientData: clientToSave,
-            saldo_cuenta: clientToSave.account && typeof clientToSave.account.balance === 'number'
-                ? clientToSave.account.balance : 0
-        };
-        saveClientDataToPersistentStorage(currentUser, wrapper);
+        saveClientDataToPersistentStorage(currentUser, clientToSave);
     }
 
     // Mostrar resultado
