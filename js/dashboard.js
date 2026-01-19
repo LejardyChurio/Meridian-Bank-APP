@@ -320,23 +320,38 @@ function processCardPayment() {
 function processPurchase() {
     const amount = parseFloat(document.getElementById('purchaseAmount').value);
     const description = document.getElementById('purchaseDescription').value || 'Compra con tarjeta de crédito';
-    
+
+    // Validación de campos
     if (!amount || amount <= 0) {
         showAlert('error', 'Ingrese un monto válido.');
         return;
     }
 
+    // Validar cliente y tarjeta
+    const clientData = getCurrentClient();
+    if (!clientData) {
+        showAlert('error', 'No se encontró el cliente actual.');
+        console.warn('[Depuración] clientData está undefined o null:', clientData);
+        return;
+    }
+    if (!clientData.creditCard) {
+        showAlert('error', 'No tienes tarjeta de crédito activa.');
+        console.warn('[Depuración] clientData.creditCard está undefined o null:', clientData.creditCard);
+        return;
+    }
+
+    // Procesar compra
     const result = useCreditCard(amount, description);
-    
+    console.log('[Depuración] Resultado de useCreditCard:', result);
+
     if (result.success) {
         showAlert('success', `Compra procesada exitosamente. Monto: ${formatCurrency(amount)}`);
-        
+
         // Actualizar la vista
-        const clientData = getCurrentClient();
         loadAccount(clientData.account);
         loadCreditCard(clientData.creditCard);
         loadTransactions(clientData.transactions);
-        
+
         // Cerrar modal
         const modal = bootstrap.Modal.getInstance(document.getElementById('cardOperationsModal'));
         modal.hide();
@@ -344,9 +359,10 @@ function processPurchase() {
         // Limpiar formulario
         document.getElementById('purchaseAmount').value = '';
         document.getElementById('purchaseDescription').value = '';
-        
+
     } else {
         showAlert('error', result.message);
+        console.warn('[Depuración] Error en la compra:', result.message, result);
     }
 }
 
