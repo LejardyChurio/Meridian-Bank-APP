@@ -308,32 +308,66 @@ function showUseCardForm() {
     document.getElementById('payCardForm').style.display = 'none';
 }
 
-function processCardPayment() {
+async function processCardPayment() {
     const amount = parseFloat(document.getElementById('payAmount').value);
-    
+
     if (!amount || amount <= 0) {
         showAlert('error', 'Ingrese un monto válido.');
         return;
     }
 
-    const result = payCreditCard(amount);
+    const result = await payCreditCard(amount);
 
     if (result.success) {
         showAlert('success', `Pago procesado exitosamente. Pagaste ${formatCurrency(amount)}`);
-        
-        // Actualizar la vista
+
+        // Obtener username seguro
         const clientData = getCurrentClient();
+        const username = clientData.usuario || sessionStorage.getItem('currentUser');
+
+        // Guardar la transacción en Supabase
+        if (typeof saveTransactionToSupabase === 'function') {
+            try {
+                await saveTransactionToSupabase(username, result.transaction);
+                console.log('[Supabase] Pago guardado en Supabase:', result.transaction);
+            } catch (err) {
+                console.warn('[Supabase] Error al guardar pago en Supabase:', err);
+            }
+        }
+
+        // Actualizar saldo de la tarjeta en Supabase
+        if (typeof updateCreditCardInSupabase === 'function') {
+            try {
+                await updateCreditCardInSupabase(username, clientData.creditCard);
+                console.log('[Supabase] Tarjeta actualizada en Supabase:', clientData.creditCard);
+            } catch (err) {
+                console.warn('[Supabase] Error al actualizar tarjeta en Supabase:', err);
+            }
+        }
+
+        // Refrescar historial de transacciones desde Supabase
+        if (typeof loadClientDataFromPersistentStorage === 'function' && username) {
+            loadClientDataFromPersistentStorage(username).then(freshData => {
+                if (freshData && freshData.clientData && Array.isArray(freshData.clientData.transactions)) {
+                    loadTransactions(freshData.clientData.transactions);
+                }
+            }).catch(err => {
+                console.warn('No se pudieron refrescar transacciones desde Supabase:', err);
+            });
+        } else {
+            loadTransactions(clientData.transactions);
+        }
+
         loadAccount(clientData.account);
         loadCreditCard(clientData.creditCard);
-        loadTransactions(clientData.transactions);
-        
+
         // Cerrar modal
         const modal = bootstrap.Modal.getInstance(document.getElementById('cardOperationsModal'));
         modal.hide();
 
         // Limpiar formulario
         document.getElementById('payAmount').value = '';
-        
+
     } else {
         showAlert('error', result.message);
     }
