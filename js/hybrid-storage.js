@@ -301,6 +301,14 @@ class HybridStorage {
         const [nombres, ...apellidosArray] = clientData.name.split(' ');
         const apellidos = apellidosArray.join(' ');
 
+        // Priorizar saldo_cuenta del wrapper si existe y es válido
+        let saldo_cuenta = 0;
+        if (typeof localData.saldo_cuenta === 'number' && !isNaN(localData.saldo_cuenta)) {
+            saldo_cuenta = localData.saldo_cuenta;
+        } else if (clientData.account && typeof clientData.account.balance === 'number') {
+            saldo_cuenta = clientData.account.balance;
+        }
+
         return {
             username: username,
             password_hash: localData.password,
@@ -311,7 +319,7 @@ class HybridStorage {
             apellidos: apellidos,
             email: clientData.email,
             telefono: clientData.phone,
-            saldo_cuenta: clientData.account.balance,
+            saldo_cuenta: saldo_cuenta,
             bank_code: 'BANCO_2',
             bank_name: 'Meridian Banco',
             status: 'active'
