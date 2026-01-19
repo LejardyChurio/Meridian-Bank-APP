@@ -46,8 +46,19 @@ function initializeDashboard(clientData) {
     // Cargar tarjeta de crédito
     loadCreditCard(clientData.creditCard);
 
-    // Cargar transacciones
+    // Cargar transacciones (primero local/session)
     loadTransactions(clientData.transactions);
+
+    // Refrescar SOLO transacciones desde Supabase (híbrido) si hay usuario
+    if (typeof loadClientDataFromPersistentStorage === 'function' && currentUser) {
+        loadClientDataFromPersistentStorage(currentUser).then(freshData => {
+            if (freshData && freshData.clientData && Array.isArray(freshData.clientData.transactions)) {
+                loadTransactions(freshData.clientData.transactions);
+            }
+        }).catch(err => {
+            console.warn('No se pudieron refrescar transacciones desde Supabase:', err);
+        });
+    }
 
     // Verificar transacciones pendientes de liquidación
     checkPendingSettlements();
