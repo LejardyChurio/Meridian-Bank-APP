@@ -7,25 +7,14 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // Obtener el usuario actual
-    const currentUser = sessionStorage.getItem('currentUser');
-    if (!currentUser) {
+    const clientData = getCurrentClient();
+    if (!clientData) {
         logout();
         return;
     }
 
-    // Cargar datos del cliente desde Supabase/localStorage (híbrido)
-    loadClientDataFromPersistentStorage(currentUser).then(clientData => {
-        if (!clientData) {
-            logout();
-            return;
-        }
-        // Inicializar dashboard con datos actualizados (incluye transacciones de Supabase)
-        initializeDashboard(clientData.clientData || clientData);
-    }).catch(err => {
-        console.error('Error cargando datos del cliente:', err);
-        logout();
-    });
+    // Inicializar dashboard
+    initializeDashboard(clientData);
 });
 
 function initializeDashboard(clientData) {
