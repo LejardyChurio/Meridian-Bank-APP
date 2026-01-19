@@ -357,13 +357,22 @@ async function processCardPayment() {
             try {
                 // Log para depuración del saldo antes de guardar
                 console.log('[Depuración] Saldo que se va a guardar en Supabase:', clientData.account.balance);
-                const clientToSave = getCurrentClient();
-                // Asegurar que el objeto tenga saldo_cuenta actualizado para Supabase
-                clientToSave.saldo_cuenta = clientToSave.account && typeof clientToSave.account.balance === 'number'
-                    ? clientToSave.account.balance
-                    : clientToSave.saldo_cuenta;
-                console.log('[Depuración] Objeto completo enviado a saveClient:', clientToSave);
-                await window.hybridStorage.saveClient(username, clientToSave);
+                let clientsDatabase = JSON.parse(localStorage.getItem('clientsDatabase')) || {};
+                let clientWrapper = clientsDatabase[username];
+                if (clientWrapper && clientWrapper.clientData) {
+                    clientWrapper.saldo_cuenta = clientWrapper.clientData.account.balance;
+                    console.log('[Depuración] Wrapper enviado a saveClient:', clientWrapper);
+                    await window.hybridStorage.saveClient(username, clientWrapper);
+                } else {
+                    // Si no existe, crea el wrapper mínimo
+                    const clientToSave = getCurrentClient();
+                    await window.hybridStorage.saveClient(username, {
+                        password: '', // o el valor correcto si lo tienes
+                        usuario: username,
+                        clientData: clientToSave,
+                        saldo_cuenta: clientToSave.account.balance
+                    });
+                }
                 console.log('[Supabase] Cuenta principal actualizada en Supabase:', clientData.account);
             } catch (err) {
                 console.error('[Supabase] Error al actualizar cuenta en Supabase:', err);
@@ -800,7 +809,18 @@ function processSettlements() {
     // Actualizar también la persistencia
     const currentUser = sessionStorage.getItem('currentUser');
     if (currentUser) {
-        saveClientDataToPersistentStorage(currentUser, clientsDatabase[clientKey].clientData);
+        // Enviar wrapper completo a la persistencia
+        if (clientsDatabase[currentUser]) {
+            saveClientDataToPersistentStorage(currentUser, clientsDatabase[currentUser]);
+        } else {
+            // Fallback: crear wrapper mínimo
+            saveClientDataToPersistentStorage(currentUser, {
+                password: '',
+                usuario: currentUser,
+                clientData: clientsDatabase[clientKey].clientData,
+                saldo_cuenta: clientsDatabase[clientKey].clientData.account.balance
+            });
+        }
     }
 
     // Mostrar resultado
