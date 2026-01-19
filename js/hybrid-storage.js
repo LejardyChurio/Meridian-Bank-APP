@@ -296,23 +296,40 @@ class HybridStorage {
         return clientData;
     }
 
-    // Convertir de localStorage a Supabase
+    // Convertir de localStorage a Supabase (acepta ambos formatos: anidado y directo)
     convertToSupabaseFormat(username, localData) {
-        const clientData = localData.clientData;
-        const [nombres, ...apellidosArray] = clientData.name.split(' ');
-        const apellidos = apellidosArray.join(' ');
+        // Detectar si los datos están anidados (con clientData) o directos
+        let data = localData.clientData ? localData.clientData : localData;
+        // Para los campos fuera de clientData
+        let password = localData.password || localData.password_hash || '';
+        let tipoDocumento = localData.tipoDocumento || localData.document_type || 'V';
+        let documento = localData.documento || localData.document_number || '';
+
+        // Nombre y apellidos
+        let nameString = data.name || data.nombres || '';
+        let [nombres, ...apellidosArray] = nameString.split(' ');
+        let apellidos = apellidosArray.join(' ');
+
+        // Email y teléfono
+        let email = data.email || localData.email || '';
+        let telefono = data.phone || localData.telefono || '';
+
+        // Cuenta
+        let account = data.account || localData.account || {};
+        let accountNumber = account.accountNumber || account.account_number || '';
+        let balance = account.balance || 0;
 
         return {
             username: username,
-            password_hash: localData.password,
-            document_type: localData.tipoDocumento || 'V',
-            document_number: localData.documento ? localData.documento.replace(/\./g, '') : 'N/A',
-            account_number: clientData.account.accountNumber,
+            password_hash: password,
+            document_type: tipoDocumento,
+            document_number: documento ? String(documento).replace(/\./g, '') : 'N/A',
+            account_number: accountNumber,
             nombres: nombres,
             apellidos: apellidos,
-            email: clientData.email,
-            telefono: clientData.phone,
-            saldo_cuenta: clientData.account.balance,
+            email: email,
+            telefono: telefono,
+            saldo_cuenta: balance,
             bank_code: 'BANCO_2',
             bank_name: 'Meridian Banco',
             status: 'active'
