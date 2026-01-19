@@ -358,6 +358,10 @@ async function processCardPayment() {
                 // Log para depuración del saldo antes de guardar
                 console.log('[Depuración] Saldo que se va a guardar en Supabase:', clientData.account.balance);
                 const clientToSave = getCurrentClient();
+                // Asegurar que el objeto tenga saldo_cuenta actualizado para Supabase
+                clientToSave.saldo_cuenta = clientToSave.account && typeof clientToSave.account.balance === 'number'
+                    ? clientToSave.account.balance
+                    : clientToSave.saldo_cuenta;
                 console.log('[Depuración] Objeto completo enviado a saveClient:', clientToSave);
                 await window.hybridStorage.saveClient(username, clientToSave);
                 console.log('[Supabase] Cuenta principal actualizada en Supabase:', clientData.account);
