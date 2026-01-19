@@ -266,6 +266,10 @@ async function requestCreditCard() {
         
         // Actualizar datos completos del cliente
         try {
+            // Asegurar que saldo_cuenta esté actualizado antes de guardar
+            if (clientData && clientData.account && typeof clientData.account.balance === 'number') {
+                clientData.saldo_cuenta = clientData.account.balance;
+            }
             await hybridStorage.saveClient(currentUser, clientData);
         } catch (saveClientError) {
             console.warn('⚠️ Error guardando cliente completo (continuando):', saveClientError);
@@ -426,7 +430,3 @@ window.payCreditCard = payCreditCard;
 window.formatCurrency = formatCurrency;
 
 console.log('🎯 Auth.js simplificado cargado completamente');
-
-
-
-
