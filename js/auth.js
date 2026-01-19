@@ -263,8 +263,17 @@ async function requestCreditCard() {
     try {
         console.log('💾 Guardando tarjeta en sistema híbrido...');
         const hybridStorage = new HybridStorage();
-        await hybridStorage.saveClient(currentUser, clientData);
+        
+        // Actualizar datos completos del cliente
+        try {
+            await hybridStorage.saveClient(currentUser, clientData);
+        } catch (saveClientError) {
+            console.warn('⚠️ Error guardando cliente completo (continuando):', saveClientError);
+        }
+        
+        // Guardar específicamente la tarjeta de crédito
         await hybridStorage.saveCreditCardToSupabase(currentUser, newCard);
+        
         console.log('✅ Tarjeta guardada exitosamente en Supabase');
     } catch (error) {
         console.error('❌ Error guardando tarjeta en sistema híbrido:', error);
@@ -417,3 +426,6 @@ window.payCreditCard = payCreditCard;
 window.formatCurrency = formatCurrency;
 
 console.log('🎯 Auth.js simplificado cargado completamente');
+
+
+
