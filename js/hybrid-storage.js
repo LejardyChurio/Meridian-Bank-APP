@@ -117,8 +117,16 @@ class HybridStorage {
 
     // Guardar cliente (híbrido: Supabase PRIMERO + localStorage)
     async saveClient(username, clientData) {
-        let supabaseSuccess = false;
+        // Mostrar el saldo que se va a guardar para depuración
+        let saldo = null;
+        if (clientData.account && typeof clientData.account.balance !== 'undefined') {
+            saldo = clientData.account.balance;
+        } else if (clientData.clientData && clientData.clientData.account && typeof clientData.clientData.account.balance !== 'undefined') {
+            saldo = clientData.clientData.account.balance;
+        }
+        console.log(`🟡 [LOG] Saldo a guardar para ${username}:`, saldo);
 
+        let supabaseSuccess = false;
         // SIEMPRE intentar guardar en Supabase PRIMERO (principal)
         if (this.useSupabase) {
             try {
@@ -129,16 +137,13 @@ class HybridStorage {
                 console.warn(`⚠️ Error guardando en Supabase: ${error.message}`);
             }
         }
-
         // Guardar en localStorage como respaldo
         this.saveToLocalStorage(username, clientData);
-
         if (supabaseSuccess) {
             console.log(`✅ Cliente ${username} guardado en Supabase + localStorage`);
         } else {
             console.log(`📱 Cliente ${username} guardado solo en localStorage (fallback)`);
         }
-
         return true;
     }
 
