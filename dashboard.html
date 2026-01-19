@@ -362,9 +362,9 @@ async function processCardPayment() {
                 const wrapper = {
                     password: clientWrapper ? clientWrapper.password : '',
                     usuario: username,
-                    tipoDocumento: clientToSave.tipoDocumento || clientToSave.clientData?.tipoDocumento,
-                    documento: clientToSave.documento || clientToSave.clientData?.documento,
-                    email: clientToSave.email || clientToSave.clientData?.email,
+                    tipoDocumento: clientToSave.tipoDocumento || clientToSave.account?.tipoDocumento || '',
+                    documento: clientToSave.documento || clientToSave.account?.documento || '',
+                    email: clientToSave.email || '',
                     clientData: clientToSave,
                     saldo_cuenta: clientToSave.account && typeof clientToSave.account.balance === 'number'
                         ? clientToSave.account.balance : 0
@@ -813,9 +813,9 @@ function processSettlements() {
         const wrapper = {
             password: clientWrapper ? clientWrapper.password : '',
             usuario: currentUser,
-            tipoDocumento: clientToSave.tipoDocumento || clientToSave.clientData?.tipoDocumento,
-            documento: clientToSave.documento || clientToSave.clientData?.documento,
-            email: clientToSave.email || clientToSave.clientData?.email,
+            tipoDocumento: clientToSave.tipoDocumento || clientToSave.account?.tipoDocumento || '',
+            documento: clientToSave.documento || clientToSave.account?.documento || '',
+            email: clientToSave.email || '',
             clientData: clientToSave,
             saldo_cuenta: clientToSave.account && typeof clientToSave.account.balance === 'number'
                 ? clientToSave.account.balance : 0
