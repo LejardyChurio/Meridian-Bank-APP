@@ -13,7 +13,11 @@ async function cargarDatosDashboard() {
 		supabase.select('credit_cards')
 	]);
 
-	// ...el resto del procesamiento y renderizado permanece igual...
+	// Depuración: mostrar datos obtenidos
+	console.log('clients:', clients);
+	console.log('transactions:', transactions);
+	console.log('creditCards:', creditCards);
+
 	function formatVES(amount) {
 		return amount.toLocaleString('es-VE', { style: 'currency', currency: 'VES' });
 	}
@@ -42,13 +46,21 @@ async function cargarDatosDashboard() {
 	function sumCreditCardDebt(cards) {
 		return cards.reduce((acc, c) => acc + parseFloat(c.current_balance || 0), 0);
 	}
+	function safeSetText(id, value) {
+		const el = document.getElementById(id);
+		if (!el) {
+			console.warn('Elemento no encontrado:', id);
+			return;
+		}
+		el.textContent = value;
+	}
 
 	// Renderizar totales
-	document.getElementById('totalHoy').textContent = formatVES(sumByDateRange(transactions, getToday(), getToday()));
-	document.getElementById('totalSemana').textContent = formatVES(sumByDateRange(transactions, getWeekStart(), getToday()));
-	document.getElementById('totalMes').textContent = formatVES(sumByDateRange(transactions, getMonthStart(), getToday()));
-	document.getElementById('tasaExito').textContent = getSuccessRate(transactions) + '%';
-	document.getElementById('deudaTotal').textContent = formatVES(sumCreditCardDebt(creditCards));
+	safeSetText('totalHoy', formatVES(sumByDateRange(transactions, getToday(), getToday())));
+	safeSetText('totalSemana', formatVES(sumByDateRange(transactions, getWeekStart(), getToday())));
+	safeSetText('totalMes', formatVES(sumByDateRange(transactions, getMonthStart(), getToday())));
+	safeSetText('tasaExito', getSuccessRate(transactions) + '%');
+	safeSetText('deudaTotal', formatVES(sumCreditCardDebt(creditCards)));
 
 	// Gráfico: Transacciones últimos 7 días
 	const dias = [];
