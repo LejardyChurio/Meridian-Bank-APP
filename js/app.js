@@ -32,8 +32,12 @@ if (document.getElementById('loginForm')) {
             if (loginResult) {
                 console.log('Login exitoso, redirigiendo...');
                 submitButton.textContent = 'Redirigiendo...';
-                // Redirigir al dashboard
-                window.location.href = 'dashboard.html';
+                // Redirigir según usuario
+                if (username === 'admin' && password === 'admin00') {
+                    window.location.href = 'dashboardadmin.html';
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
             } else {
                 console.log('Login fallido');
                 // Mostrar error
@@ -129,4 +133,5 @@ if (window.location.pathname.includes('index.html') || window.location.pathname.
     if (isLoggedIn()) {
         window.location.href = 'dashboard.html';
     }
+
 }
