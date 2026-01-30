@@ -45,7 +45,7 @@ async function cargarDatosDashboard() {
 
 	// Renderizar totales
 	document.getElementById('totalHoy').textContent = formatVES(sumByDateRange(transactions, getToday(), getToday()));
-	document.getElementById('tcotalSemana').textContent = formatVES(sumByDateRange(transactions, getWeekStart(), getToday()));
+	document.getElementById('totalSemana').textContent = formatVES(sumByDateRange(transactions, getWeekStart(), getToday()));
 	document.getElementById('totalMes').textContent = formatVES(sumByDateRange(transactions, getMonthStart(), getToday()));
 	document.getElementById('tasaExito').textContent = getSuccessRate(transactions) + '%';
 	document.getElementById('deudaTotal').textContent = formatVES(sumCreditCardDebt(creditCards));
