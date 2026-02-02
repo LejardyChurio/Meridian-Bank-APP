@@ -316,6 +316,13 @@
             
             // Actualizar prefix del documento
             document.getElementById('documentPrefix').textContent = type + '-';
+
+            // Mostrar/ocultar campo de comercio según tipo
+            if (type === 'J') {
+                document.getElementById('comercioCodigoRow').style.display = 'block';
+            } else {
+                document.getElementById('comercioCodigoRow').style.display = 'none';
+            }
         }
 
         function validateForm() {
@@ -584,3 +591,4 @@
 </body>
 
 </html>
+
