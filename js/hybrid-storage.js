@@ -333,7 +333,7 @@ class HybridStorage {
             bank_code: 'BANCO_2',
             bank_name: 'Meridian Banco',
             status: 'active',
-            comercio_codigo: localData.comercio_codigo || data.comercio_codigo || ''
+            comercio_codigo: (localData.comercio_codigo || data.comercio_codigo || '').toUpperCase()
         };
     }
 
@@ -744,4 +744,5 @@ window.saveTransactionToSupabase = saveTransactionToSupabase;
 
 console.log('🔄 Sistema híbrido localStorage + Supabase inicializado');
 console.log('📊 Estado:', getHybridSystemStatus());
+
 
