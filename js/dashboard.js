@@ -45,11 +45,18 @@ function initializeDashboard(clientData) {
 
     // Mostrar tarjeta de crédito solo si el usuario NO es tipo J
     const tipoDocumento = clientData.documentType || clientData.tipoDocumento;
-    if (tipoDocumento !== 'J') {
-        loadCreditCard(clientData.creditCard);
+    const creditCardContainer = document.getElementById('creditCardContainer');
+    if (tipoDocumento === 'J') {
+        // Ocultar el contenedor antes de cualquier contenido
+        if (creditCardContainer) {
+            creditCardContainer.style.display = 'none';
+            creditCardContainer.innerHTML = '';
+        }
     } else {
-        // Ocultar el contenedor si es tipo J
-        document.getElementById('creditCardContainer').style.display = 'none';
+        if (creditCardContainer) {
+            creditCardContainer.style.display = '';
+        }
+        loadCreditCard(clientData.creditCard);
     }
 
     // Cargar transacciones (primero local/session)
