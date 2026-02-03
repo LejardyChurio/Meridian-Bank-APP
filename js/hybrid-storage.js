@@ -269,9 +269,11 @@ class HybridStorage {
         // CARGAR TRANSACCIONES DESDE TABLA SEPARADA
         try {
             const transactions = await supabase.select('transactions', '*', { client_id: supabaseClient.id });
-            if (transactions && transactions.length > 0) {
-                // Mapear formato para frontend si es necesario
-                clientData.clientData.transactions = transactions.map(tx => ({
+            // Ordenar por fecha descendente y tomar los 10 más recientes
+            transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+            const last10 = transactions.slice(0, 10);
+            if (last10.length > 0) {
+                clientData.clientData.transactions = last10.map(tx => ({
                     id: tx.transaction_id,
                     date: tx.date,
                     description: tx.description,
@@ -281,9 +283,9 @@ class HybridStorage {
                     accountId: tx.account_id,
                     authCode: tx.auth_code,
                     status: tx.status,
-                    displayTime: tx.date // Puedes ajustar el formato si lo necesitas
+                    displayTime: tx.date
                 }));
-                console.log(`✅ ${transactions.length} transacciones cargadas desde Supabase para ${username}`);
+                console.log(`✅ ${last10.length} transacciones cargadas desde Supabase para ${username}`);
             } else {
                 clientData.clientData.transactions = [];
                 console.log('ℹ️ No se encontraron transacciones para el usuario:', username);
@@ -744,5 +746,3 @@ window.saveTransactionToSupabase = saveTransactionToSupabase;
 
 console.log('🔄 Sistema híbrido localStorage + Supabase inicializado');
 console.log('📊 Estado:', getHybridSystemStatus());
-
-
