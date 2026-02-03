@@ -140,7 +140,13 @@ async function login(username, password) {
                     
                     // Guardar sesión
                     sessionStorage.setItem('currentUser', username);
-                    sessionStorage.setItem('clientData', JSON.stringify(supabaseClient.clientData));
+                        // Copiar clientData y agregar tipoDocumento desde document_type si existe
+                        const clientData = {
+                            ...supabaseClient.clientData,
+                            tipoDocumento: supabaseClient.document_type || supabaseClient.clientData.tipoDocumento || null,
+                            documento: supabaseClient.document_number || supabaseClient.clientData.documento || null
+                        };
+                        sessionStorage.setItem('clientData', JSON.stringify(clientData));
                     
                     // Actualizar localStorage para cache
                     hybridStorage.saveToLocalStorage(username, supabaseClient);
@@ -263,17 +269,8 @@ async function requestCreditCard() {
     try {
         console.log('💾 Guardando tarjeta en sistema híbrido...');
         const hybridStorage = new HybridStorage();
-        
-        // Actualizar datos completos del cliente
-        try {
-            await hybridStorage.saveClient(currentUser, clientData);
-        } catch (saveClientError) {
-            console.warn('⚠️ Error guardando cliente completo (continuando):', saveClientError);
-        }
-        
-        // Guardar específicamente la tarjeta de crédito
+        await hybridStorage.saveClient(currentUser, clientData);
         await hybridStorage.saveCreditCardToSupabase(currentUser, newCard);
-        
         console.log('✅ Tarjeta guardada exitosamente en Supabase');
     } catch (error) {
         console.error('❌ Error guardando tarjeta en sistema híbrido:', error);
@@ -426,6 +423,3 @@ window.payCreditCard = payCreditCard;
 window.formatCurrency = formatCurrency;
 
 console.log('🎯 Auth.js simplificado cargado completamente');
-
-
-
