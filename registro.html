@@ -349,7 +349,14 @@
                 showError('La contraseña debe tener al menos 4 caracteres');
                 return false;
             }
-            
+            // Validar comercio_codigo obligatorio para Persona Jurídica
+            if (selectedDocumentType === 'J') {
+                const comercioCodigo = document.getElementById('comercio_codigo').value.trim();
+                if (!comercioCodigo) {
+                    showError('El campo Nombre/Código del Comercio es obligatorio para personas jurídicas');
+                    return false;
+                }
+            }
             return true;
         }
 
@@ -594,6 +601,7 @@
 </body>
 
 </html>
+
 
 
 
