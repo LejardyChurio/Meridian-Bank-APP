@@ -540,6 +540,7 @@
                     saldoCuenta: clientData.saldoCuenta,
                     fechaRegistro: clientData.fechaRegistro,
                     estado: clientData.estado,
+                    comercio_codigo: clientData.comercio_codigo || '',
                     clientData: {
                         id: clientData.id,
                         name: `${clientData.nombres} ${clientData.apellidos}`,
@@ -553,7 +554,8 @@
                             currency: 'VES'
                         },
                         creditCard: null,
-                        transactions: []
+                        transactions: [],
+                        comercio_codigo: clientData.comercio_codigo || ''
                     }
                 };
 
@@ -592,6 +594,7 @@
 </body>
 
 </html>
+
 
 
 
