@@ -47,7 +47,7 @@ function initializeDashboard(clientData) {
     const tipoDocumento = clientData.documentType || clientData.tipoDocumento;
     const creditCardContainer = document.getElementById('creditCardContainer');
     if (tipoDocumento === 'J') {
-        // Ocultar el contenedor antes de cualquier contenido
+        // Ocultar el contenedor y NO mostrar ni configurar nada de tarjeta
         if (creditCardContainer) {
             creditCardContainer.style.display = 'none';
             creditCardContainer.innerHTML = '';
@@ -57,6 +57,10 @@ function initializeDashboard(clientData) {
             creditCardContainer.style.display = '';
         }
         loadCreditCard(clientData.creditCard);
+        // Configurar modal de nueva tarjeta si no tiene una
+        if (!clientData.creditCard) {
+            setupNewCardModal(clientData.account);
+        }
     }
 
     // Cargar transacciones (primero local/session)
@@ -75,11 +79,6 @@ function initializeDashboard(clientData) {
 
     // Verificar transacciones pendientes de liquidación
     checkPendingSettlements();
-
-    // Configurar modal de nueva tarjeta si no tiene una
-    if (!clientData.creditCard) {
-        setupNewCardModal(clientData.account);
-    }
 }
 
 function loadAccount(account) {
