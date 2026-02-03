@@ -43,8 +43,14 @@ function initializeDashboard(clientData) {
     // Cargar cuenta principal
     loadAccount(clientData.account);
 
-    // Cargar tarjeta de crédito
-    loadCreditCard(clientData.creditCard);
+    // Mostrar tarjeta de crédito solo si el usuario NO es tipo J
+    const tipoDocumento = clientData.documentType || clientData.tipoDocumento;
+    if (tipoDocumento !== 'J') {
+        loadCreditCard(clientData.creditCard);
+    } else {
+        // Ocultar el contenedor si es tipo J
+        document.getElementById('creditCardContainer').style.display = 'none';
+    }
 
     // Cargar transacciones (primero local/session)
     loadTransactions(clientData.transactions);
