@@ -45,14 +45,17 @@ function initializeDashboard(clientData) {
 
     // Mostrar tarjeta de crédito solo si el usuario NO es tipo J
     const tipoDocumento = clientData.documentType || clientData.tipoDocumento;
-    const creditCardContainer = document.getElementById('creditCardContainer');
+    const creditCardSection = document.getElementById('creditCardSection');
     if (tipoDocumento === 'J') {
-        // Ocultar el contenedor y NO mostrar ni configurar nada de tarjeta
-        if (creditCardContainer) {
-            creditCardContainer.style.display = 'none';
-            creditCardContainer.innerHTML = '';
+        // Ocultar el bloque completo de tarjeta de crédito (título + contenido)
+        if (creditCardSection) {
+            creditCardSection.style.display = 'none';
         }
     } else {
+        if (creditCardSection) {
+            creditCardSection.style.display = '';
+        }
+        const creditCardContainer = document.getElementById('creditCardContainer');
         if (creditCardContainer) {
             creditCardContainer.style.display = '';
         }
