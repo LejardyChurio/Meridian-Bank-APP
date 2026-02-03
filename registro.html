@@ -426,7 +426,8 @@
                 password: document.getElementById('password').value,
                 saldoCuenta: selectedDocumentType === 'V' ? 30000 : 50000,
                 fechaRegistro: new Date().toISOString(),
-                estado: 'activo'
+                estado: 'activo',
+                comercio_codigo: selectedDocumentType === 'J' ? document.getElementById('comercio_codigo').value : ''
             };
             
             // Verificar si el usuario ya existe
@@ -591,6 +592,7 @@
 </body>
 
 </html>
+
 
 
 
