@@ -268,28 +268,28 @@ class HybridStorage {
 
         // CARGAR TRANSACCIONES DESDE TABLA SEPARADA
         try {
-            const transactions = await supabase.select('transactions', '*', { client_id: supabaseClient.id });
-            // Ordenar por fecha descendente y tomar los 10 más recientes
-            transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-            const last10 = transactions.slice(0, 10);
-            if (last10.length > 0) {
-                clientData.clientData.transactions = last10.map(tx => ({
-                    id: tx.transaction_id,
-                    date: tx.date,
-                    description: tx.description,
-                    amount: parseFloat(tx.amount),
-                    type: tx.transaction_type,
-                    reference: tx.reference,
-                    accountId: tx.account_id,
-                    authCode: tx.auth_code,
-                    status: tx.status,
-                    displayTime: tx.date
-                }));
-                console.log(`✅ ${last10.length} transacciones cargadas desde Supabase para ${username}`);
-            } else {
-                clientData.clientData.transactions = [];
-                console.log('ℹ️ No se encontraron transacciones para el usuario:', username);
-            }
+                const transactions = await supabase.select('transactions', '*', { client_id: supabaseClient.id });
+                // Ordenar por fecha y hora de creación descendente y tomar los 10 más recientes
+                transactions.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                const last10 = transactions.slice(0, 10);
+                if (last10.length > 0) {
+                    clientData.clientData.transactions = last10.map(tx => ({
+                        id: tx.transaction_id,
+                        date: tx.date,
+                        description: tx.description,
+                        amount: parseFloat(tx.amount),
+                        type: tx.transaction_type,
+                        reference: tx.reference,
+                        accountId: tx.account_id,
+                        authCode: tx.auth_code,
+                        status: tx.status,
+                        displayTime: tx.date
+                    }));
+                    console.log(`✅ ${last10.length} transacciones cargadas desde Supabase para ${username}`);
+                } else {
+                    clientData.clientData.transactions = [];
+                    console.log('ℹ️ No se encontraron transacciones para el usuario:', username);
+                }
         } catch (txError) {
             clientData.clientData.transactions = [];
             console.warn('⚠️ Error cargando transacciones:', txError);
