@@ -143,8 +143,8 @@ async function login(username, password) {
                         // Copiar clientData y agregar tipoDocumento desde document_type si existe
                         const clientData = {
                             ...supabaseClient.clientData,
-                            tipoDocumento: supabaseClient.document_type || supabaseClient.clientData.tipoDocumento || null,
-                            documento: supabaseClient.document_number || supabaseClient.clientData.documento || null
+                            tipoDocumento: supabaseClient.document_type || supabaseClient.tipoDocumento || supabaseClient.clientData.tipoDocumento || null,
+                            documento: supabaseClient.document_number || supabaseClient.documento || supabaseClient.clientData.documento || null
                         };
                         sessionStorage.setItem('clientData', JSON.stringify(clientData));
                     
