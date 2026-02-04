@@ -776,7 +776,8 @@ function processSettlements() {
         // Crear transacción en el historial del cliente
         const newTransaction = {
             id: transaction.id,
-            date: new Date(transaction.timestamp).toISOString().split('T')[0], // Formato YYYY-MM-DD
+            //date: new Date(transaction.timestamp).toISOString().split('T')[0], // Formato YYYY-MM-DD
+            date: transaction.date, // Toma la fecha simple del registro
             description: `${transaction.description} - ${transaction.commerceName}`,
             amount: -transaction.amount, // Negativo porque es un cargo
             type: 'COMPRA_POS',
@@ -879,3 +880,4 @@ function showNotification(title, message, type) {
     const fullMessage = `<strong>${title}</strong><br>${message}`;
     showAlert(type, fullMessage);
 }
+
