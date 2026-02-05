@@ -46,6 +46,10 @@ async function cargarDatosDashboard() {
 	function sumCreditCardDebt(cards) {
 		return cards.reduce((acc, c) => acc + parseFloat(c.current_balance || 0), 0);
 	}
+	function getAdminCommissionTotal(clients) {
+    const admin = clients.find(c => c.username === 'admin' && c.status === 'active');
+    return admin ? parseFloat(admin.saldo_cuenta || 0) : 0;
+	}
 	function safeSetText(id, value) {
 		const el = document.getElementById(id);
 		if (!el) {
@@ -61,6 +65,7 @@ async function cargarDatosDashboard() {
 	safeSetText('totalMes', formatVES(sumByDateRange(transactions, getMonthStart(), getToday())));
 	safeSetText('tasaExito', getSuccessRate(transactions) + '%');
 	safeSetText('deudaTotal', formatVES(sumCreditCardDebt(creditCards)));
+	safeSetText('totalComisiones', formatVES(getAdminCommissionTotal(clients)));
 
 	// Gráfico: Transacciones últimos 7 días
 	const dias = [];
@@ -131,4 +136,5 @@ async function cargarDatosDashboard() {
 
 // Ejecutar la carga al iniciar
 window.addEventListener('DOMContentLoaded', cargarDatosDashboard);
+
 
