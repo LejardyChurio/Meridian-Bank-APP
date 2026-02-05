@@ -199,12 +199,13 @@ function loadCreditCard(creditCard) {
 
 function formatDate(dateString) {
     if (!dateString) return '';
-    const date = new Date(dateString);
-    if (isNaN(date)) return dateString;
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+    // Si el formato es YYYY-MM-DD, lo convertimos manualmente
+    const parts = dateString.split('-');
+    if (parts.length === 3) {
+        const [year, month, day] = parts;
+        return `${day}/${month}/${year}`;
+    }
+    return dateString;
 }
 
 function loadTransactions(transactions) {
@@ -880,4 +881,5 @@ function showNotification(title, message, type) {
     const fullMessage = `<strong>${title}</strong><br>${message}`;
     showAlert(type, fullMessage);
 }
+
 
