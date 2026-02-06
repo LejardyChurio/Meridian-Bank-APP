@@ -34,9 +34,10 @@ async function cargarDatosDashboard() {
 		const now = new Date();
 		return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
 	}
-	function sumByDateRange(transactions, start, end) {
-		return transactions.filter(t => t.date >= start && t.date <= end)
-			.reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
+	function sumAbonosByDateRange(transactions, start, end) {
+  		return transactions
+    		.filter(t => t.date >= start && t.date <= end && t.transaction_type === 'Abono')
+    		.reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
 	}
 	function getSuccessRate(transactions) {
 		const total = transactions.length;
@@ -60,9 +61,9 @@ async function cargarDatosDashboard() {
 	}
 
 	// Renderizar totales
-	safeSetText('totalHoy', formatVES(sumByDateRange(transactions, getToday(), getToday())));
-	safeSetText('totalSemana', formatVES(sumByDateRange(transactions, getWeekStart(), getToday())));
-	safeSetText('totalMes', formatVES(sumByDateRange(transactions, getMonthStart(), getToday())));
+	safeSetText('totalHoy', formatVES(sumAbonosByDateRange(transactions, getToday(), getToday())));
+	safeSetText('totalSemana', formatVES(sumAbonosByDateRange(transactions, getWeekStart(), getToday())));
+	safeSetText('totalMes', formatVES(sumAbonosByDateRange(transactions, getMonthStart(), getToday())));
 	safeSetText('tasaExito', getSuccessRate(transactions) + '%');
 	safeSetText('deudaTotal', formatVES(sumCreditCardDebt(creditCards)));
 	safeSetText('totalComisiones', formatVES(getAdminCommissionTotal(clients)));
@@ -136,5 +137,6 @@ async function cargarDatosDashboard() {
 
 // Ejecutar la carga al iniciar
 window.addEventListener('DOMContentLoaded', cargarDatosDashboard);
+
 
 
