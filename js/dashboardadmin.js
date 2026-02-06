@@ -21,8 +21,12 @@ async function cargarDatosDashboard() {
 	function formatVES(amount) {
 		return amount.toLocaleString('es-VE', { style: 'currency', currency: 'VES' });
 	}
+	//function getToday() {
+	//	return new Date().toISOString().split('T')[0];
+	//}
 	function getToday() {
-		return new Date().toISOString().split('T')[0];
+    	const now = new Date();
+    	return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
 	}
 	function getWeekStart() {
 		const now = new Date();
@@ -146,6 +150,7 @@ async function cargarDatosDashboard() {
 
 // Ejecutar la carga al iniciar
 window.addEventListener('DOMContentLoaded', cargarDatosDashboard);
+
 
 
 
