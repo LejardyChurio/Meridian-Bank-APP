@@ -35,9 +35,16 @@ async function cargarDatosDashboard() {
 		return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
 	}
 	function sumAbonosByDateRange(transactions, start, end) {
-  		return transactions
-    		.filter(t => t.date >= start && t.date <= end && t.transaction_type === 'Abono')
-    		.reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
+	// DEPURACIÓN: Mostrar transacciones Abono de hoy
+	const hoy = getToday();
+	const abonosHoy = transactions.filter(t => t.date === hoy && t.transaction_type === 'Abono');
+	console.log('Abonos hoy:', abonosHoy);
+	console.log('Cantidad Abonos hoy:', abonosHoy.length);
+	console.log('Montos Abonos hoy:', abonosHoy.map(t => t.amount));
+	console.log('Total Abonos hoy:', abonosHoy.reduce((acc, t) => acc + parseFloat(t.amount || 0), 0));
+	return transactions
+		.filter(t => t.date >= start && t.date <= end && t.transaction_type === 'Abono')
+		.reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
 	}
 	function getSuccessRate(transactions) {
 		const total = transactions.length;
@@ -137,6 +144,7 @@ async function cargarDatosDashboard() {
 
 // Ejecutar la carga al iniciar
 window.addEventListener('DOMContentLoaded', cargarDatosDashboard);
+
 
 
 
