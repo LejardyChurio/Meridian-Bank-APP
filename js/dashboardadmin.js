@@ -80,7 +80,9 @@ async function cargarDatosDashboard() {
 		const d = new Date();
 		d.setDate(d.getDate()-i);
 		const fecha = d.toISOString().split('T')[0];
-		dias.push(fecha.slice(5));
+		// Formato DD/MM
+		const [year, month, day] = fecha.split('-');
+		dias.push(`${day}/${month}`);
 		transPorDia.push(transactions.filter(t => t.date === fecha).length);
 	}
 	new Chart(document.getElementById('graficoTransacciones7d'), {
@@ -142,6 +144,7 @@ async function cargarDatosDashboard() {
 
 // Ejecutar la carga al iniciar
 window.addEventListener('DOMContentLoaded', cargarDatosDashboard);
+
 
 
 
