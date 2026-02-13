@@ -264,6 +264,7 @@
                         <label for="comercio_codigo"><i class="fas fa-store"></i> Nombre/Código del Comercio</label>
                     </div>
                 </div>
+                </div>
 
                 <!-- Datos de acceso -->
                 <h5 class="mt-4 mb-3"><i class="fas fa-key"></i> Datos de Acceso</h5>
@@ -305,18 +306,14 @@
 
         function selectDocumentType(type) {
             selectedDocumentType = type;
-            
             // Remover selección anterior
             document.querySelectorAll('.document-option').forEach(option => {
                 option.classList.remove('selected');
             });
-            
             // Agregar selección actual
             document.querySelector(`[data-type="${type}"]`).classList.add('selected');
-            
             // Actualizar prefix del documento
             document.getElementById('documentPrefix').textContent = type + '-';
-
             // Mostrar/ocultar campo de comercio según tipo
             if (type === 'J') {
                 document.getElementById('comercioCodigoRow').style.display = 'block';
@@ -349,6 +346,7 @@
                 showError('La contraseña debe tener al menos 4 caracteres');
                 return false;
             }
+            
             // Validar comercio_codigo obligatorio para Persona Jurídica
             if (selectedDocumentType === 'J') {
                 const comercioCodigo = document.getElementById('comercio_codigo').value.trim();
@@ -566,19 +564,32 @@
                     }
                 };
 
+                // Validación previa de username y document_number
+                // Consultar localStorage para evitar duplicados
+                const existingClients = JSON.parse(localStorage.getItem('clientsDatabase')) || {};
+                const usernameExists = Object.values(existingClients).some(client => client.usuario === clientData.usuario);
+                const documentNumberExists = Object.values(existingClients).some(client => client.documento === clientData.documento);
+                if (usernameExists) {
+                    showError('El nombre de usuario ya está registrado');
+                    return;
+                }
+                if (documentNumberExists) {
+                    showError('El número de documento ya está registrado');
+                    return;
+                }
+
                 // Guardar usando el sistema híbrido (localStorage + Supabase automáticamente)
                 await hybridStorage.saveClient(clientData.usuario, hybridClientData);
                 
                 console.log(`✅ Cliente ${clientData.usuario} registrado en sistema híbrido`);
                 
                 // También mantener el formato original en localStorage para compatibilidad
-                const existingClients = JSON.parse(localStorage.getItem('clientsDatabase')) || {};
                 existingClients[clientData.id] = clientData;
                 localStorage.setItem('clientsDatabase', JSON.stringify(existingClients));
                 
             } catch (error) {
                 console.error('❌ Error guardando cliente en sistema híbrido:', error);
-                
+                showError(error.message);
                 // Fallback: guardar solo en localStorage si falla Supabase
                 const existingClients = JSON.parse(localStorage.getItem('clientsDatabase')) || {};
                 existingClients[clientData.id] = clientData;
@@ -599,11 +610,4 @@
         });
     </script>
 </body>
-
 </html>
-
-
-
-
-
-
