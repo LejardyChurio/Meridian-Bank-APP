@@ -249,7 +249,7 @@ async function requestCreditCard() {
     const newCard = {
         cardId: `CARD_${Date.now()}`,
         cardNumber: generateCardNumber(),
-        expirationDate: generateExpirationDate(),
+        expiryDate: generateExpirationDate(),
         cvv: generateCVV(),
         creditLimit: 50000.00,
         currentBalance: 0.00,
@@ -423,4 +423,5 @@ window.payCreditCard = payCreditCard;
 window.formatCurrency = formatCurrency;
 
 console.log('🎯 Auth.js simplificado cargado completamente');
+
 
