@@ -217,6 +217,17 @@ class HybridStorage {
         } else {
             // Insertar nuevo cliente (incluye document_number si es la primera vez)
             await supabase.insert('clients', supabaseData);
+                // Generar API key solo para persona jurídica
+                if (supabaseData.document_type === 'J') {
+                    const apiKey = crypto.randomUUID();
+                    await supabase.insert('api_keys', {
+                        key: apiKey,
+                        commerce_id: supabaseData.username,
+                        status: 'active',
+                        created_at: new Date().toISOString()
+                    });
+                    console.log('✅ API key generada y guardada para comercio:', apiKey);
+                }
         }
         // Guardar tarjeta de crédito si existe
         if (clientData.clientData && clientData.clientData.creditCard) {
