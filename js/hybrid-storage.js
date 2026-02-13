@@ -204,7 +204,16 @@ class HybridStorage {
     async saveToSupabase(username, clientData) {
         // Convertir formato localStorage a Supabase
         const supabaseData = this.convertToSupabaseFormat(username, clientData);
-        // Verificar si el cliente ya existe
+        // Validar duplicados en Supabase antes de insertar
+        const usernameExists = await supabase.select('clients', '*', { username: supabaseData.username });
+        if (usernameExists.length > 0) {
+            throw new Error('El nombre de usuario ya está registrado en Supabase');
+        }
+        const documentNumberExists = await supabase.select('clients', '*', { document_number: supabaseData.document_number });
+        if (documentNumberExists.length > 0) {
+            throw new Error('El número de documento ya está registrado en Supabase');
+        }
+        // Verificar si el cliente ya existe por username
         const existing = await supabase.select('clients', '*', { username: username });
         if (existing.length > 0) {
             // Solo actualizar saldo_cuenta y campos permitidos, NO document_number ni otros sensibles
@@ -217,17 +226,17 @@ class HybridStorage {
         } else {
             // Insertar nuevo cliente (incluye document_number si es la primera vez)
             await supabase.insert('clients', supabaseData);
-                // Generar API key solo para persona jurídica
-                if (supabaseData.document_type === 'J') {
-                    const apiKey = crypto.randomUUID();
-                    await supabase.insert('api_keys', {
-                        key: apiKey,
-                        commerce_id: supabaseData.username,
-                        status: 'active',
-                        created_at: new Date().toISOString()
-                    });
-                    console.log('✅ API key generada y guardada para comercio:', apiKey);
-                }
+            // Generar API key solo para persona jurídica
+            if (supabaseData.document_type === 'J') {
+                const apiKey = crypto.randomUUID();
+                await supabase.insert('api_keys', {
+                    key: apiKey,
+                    commerce_id: supabaseData.username,
+                    status: 'active',
+                    created_at: new Date().toISOString()
+                });
+                console.log('✅ API key generada y guardada para comercio:', apiKey);
+            }
         }
         // Guardar tarjeta de crédito si existe
         if (clientData.clientData && clientData.clientData.creditCard) {
