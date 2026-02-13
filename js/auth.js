@@ -385,7 +385,7 @@ async function payCreditCard(amount) {
 
 // Funciones auxiliares
 function generateCardNumber() {
-    return '4567-1234-' + 
+    return '0002-1234-' + 
         String(Math.floor(Math.random() * 9000) + 1000) + '-' + 
         String(Math.floor(Math.random() * 9000) + 1000);
 }
@@ -423,3 +423,4 @@ window.payCreditCard = payCreditCard;
 window.formatCurrency = formatCurrency;
 
 console.log('🎯 Auth.js simplificado cargado completamente');
+
