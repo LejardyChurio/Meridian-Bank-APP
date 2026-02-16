@@ -414,20 +414,14 @@
 
         document.getElementById('registrationForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
             if (!validateForm()) {
                 return;
             }
-            
-            // Generar número de cuenta único de 20 dígitos (0100 + 16 aleatorios)
-            const accountNumber = AccountNumberGenerator.generateAccountNumber();
-            
-            // Recopilar datos del formulario
+            // Recopilar datos del formulario (sin generar cuenta aún)
             const formData = {
                 id: generateClientId(),
                 tipoDocumento: selectedDocumentType,
                 documento: document.getElementById('documento').value,
-                numeroCuenta: accountNumber, // Nuevo número de cuenta único
                 nombres: document.getElementById('nombres').value,
                 apellidos: document.getElementById('apellidos').value,
                 email: document.getElementById('email').value,
@@ -440,22 +434,19 @@
                 estado: 'activo',
                 comercio_codigo: selectedDocumentType === 'J' ? document.getElementById('comercio_codigo').value : ''
             };
-            
             // Verificar si el usuario ya existe
             const existingClients = JSON.parse(localStorage.getItem('clientsDatabase')) || {};
-            
             const userExists = Object.values(existingClients).some(client => 
                 client.usuario === formData.usuario || client.email === formData.email
             );
-            
             if (userExists) {
                 showError('El nombre de usuario o correo electrónico ya están registrados');
                 return;
             }
-            
+            // Generar número de cuenta único de 20 dígitos (solo si usuario válido)
+            formData.numeroCuenta = AccountNumberGenerator.generateAccountNumber();
             // Guardar cliente usando el sistema híbrido (localStorage + Supabase)
             await saveNewClient(formData);
-            
             // Mostrar mensaje de éxito
             showSuccess(formData);
         });
