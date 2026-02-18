@@ -19,7 +19,7 @@
 
   <!-- Mover el script de pruebas al final para asegurar que Mocha y Chai estén definidos -->
   <script>
-    window.addEventListener('DOMContentLoaded', function() {
+    window.onload = function() {
       const assert = chai.assert;
       const expect = chai.expect;
 
