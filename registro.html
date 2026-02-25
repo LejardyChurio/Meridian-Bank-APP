@@ -446,9 +446,12 @@
             // Generar número de cuenta único de 20 dígitos (solo si usuario válido)
             formData.numeroCuenta = AccountNumberGenerator.generateAccountNumber();
             // Guardar cliente usando el sistema híbrido (localStorage + Supabase)
-            await saveNewClient(formData);
-            // Mostrar mensaje de éxito
-            showSuccess(formData);
+                await saveNewClient(formData);
+                // Solo mostrar éxito si no hay error visible
+                const errorDiv = document.getElementById('errorMessage');
+                if (errorDiv.style.display === 'none' || errorDiv.style.display === '') {
+                    showSuccess(formData);
+                }
         });
 
         // Formatear teléfono mientras se escribe
@@ -581,7 +584,7 @@
                 const existingClients = JSON.parse(localStorage.getItem('clientsDatabase')) || {};
                 const usernameExists = Object.values(existingClients).some(client => client.usuario === clientData.usuario);
                 const documentNumberExists = Object.values(existingClients).some(client => client.documento === clientData.documento);
-                const comercioCodigoExists = Object.values(existingClients).some(client => client.comercio_codigo === clientData.comercio_codigo);
+                const comercioCodigoExists = selectedDocumentType === 'J' && Object.values(existingClients).some(client => client.comercio_codigo === clientData.comercio_codigo);
                 if (usernameExists) {
                     showError('El nombre de usuario ya está registrado');
                     return;
@@ -627,5 +630,6 @@
     </script>
 </body>
 </html>
+
 
 
