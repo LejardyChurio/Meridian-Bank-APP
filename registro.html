@@ -581,6 +581,7 @@
                 const existingClients = JSON.parse(localStorage.getItem('clientsDatabase')) || {};
                 const usernameExists = Object.values(existingClients).some(client => client.usuario === clientData.usuario);
                 const documentNumberExists = Object.values(existingClients).some(client => client.documento === clientData.documento);
+                const comercioCodigoExists = selectedDocumentType === 'J' && Object.values(existingClients).some(client => client.comercio_codigo === clientData.comercio_codigo);
                 if (usernameExists) {
                     showError('El nombre de usuario ya está registrado');
                     return;
@@ -589,7 +590,10 @@
                     showError('El número de documento ya está registrado');
                     return;
                 }
-
+                if (comercioCodigoExists) {
+                    showError('El código de comercio ya está registrado');
+                    return;
+                }
                 // Guardar usando el sistema híbrido (localStorage + Supabase automáticamente)
                 await hybridStorage.saveClient(clientData.usuario, hybridClientData);
                 
@@ -623,3 +627,4 @@
     </script>
 </body>
 </html>
+
