@@ -581,7 +581,7 @@
                 const existingClients = JSON.parse(localStorage.getItem('clientsDatabase')) || {};
                 const usernameExists = Object.values(existingClients).some(client => client.usuario === clientData.usuario);
                 const documentNumberExists = Object.values(existingClients).some(client => client.documento === clientData.documento);
-                const comercioCodigoExists = selectedDocumentType === 'J' && Object.values(existingClients).some(client => client.comercio_codigo === clientData.comercio_codigo);
+                const comercioCodigoExists = Object.values(existingClients).some(client => client.comercio_codigo === clientData.comercio_codigo);
                 if (usernameExists) {
                     showError('El nombre de usuario ya está registrado');
                     return;
@@ -627,4 +627,5 @@
     </script>
 </body>
 </html>
+
 
