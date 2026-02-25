@@ -213,6 +213,10 @@ class HybridStorage {
         if (documentNumberExists.length > 0) {
             throw new Error('El número de documento ya está registrado en Supabase');
         }
+        const comercioCodigoExists = await supabase.select('clients', '*', { comercio_codigo: supabaseData.comercio_codigo });
+        if (comercioCodigoExists.length > 0) {
+            throw new Error('El código de comercio ya está registrado en Supabase');
+        }
         // Verificar si el cliente ya existe por username
         const existing = await supabase.select('clients', '*', { username: username });
         if (existing.length > 0) {
@@ -766,3 +770,4 @@ window.saveTransactionToSupabase = saveTransactionToSupabase;
 
 console.log('🔄 Sistema híbrido localStorage + Supabase inicializado');
 console.log('📊 Estado:', getHybridSystemStatus());
+
