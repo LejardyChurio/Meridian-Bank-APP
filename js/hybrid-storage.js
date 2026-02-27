@@ -204,17 +204,22 @@ class HybridStorage {
     async saveToSupabase(username, clientData) {
         // Convertir formato localStorage a Supabase
         const supabaseData = this.convertToSupabaseFormat(username, clientData);
+        console.log('[DEBUG] Intentando guardar en Supabase. Datos a insertar:', supabaseData);
         // Validar duplicados en Supabase antes de insertar
         const usernameExists = await supabase.select('clients', '*', { username: supabaseData.username });
         if (usernameExists.length > 0) {
+            console.log('[DEBUG] Username ya existe en Supabase:', supabaseData.username);
             throw new Error('El nombre de usuario ya está registrado en Supabase');
         }
         const documentNumberExists = await supabase.select('clients', '*', { document_number: supabaseData.document_number });
         if (documentNumberExists.length > 0) {
+            console.log('[DEBUG] Número de documento ya existe en Supabase:', supabaseData.document_number);
             throw new Error('El número de documento ya está registrado en Supabase');
         }
+        // Validar duplicado de comercio_codigo en Supabase (mismo estilo que document_number)
         const comercioCodigoExists = await supabase.select('clients', '*', { comercio_codigo: supabaseData.comercio_codigo });
         if (comercioCodigoExists.length > 0) {
+            console.log('[DEBUG] Código de comercio ya existe en Supabase:', supabaseData.comercio_codigo);
             throw new Error('El código de comercio ya está registrado en Supabase');
         }
         // Verificar si el cliente ya existe por username
@@ -226,10 +231,17 @@ class HybridStorage {
                 // Puedes agregar otros campos que sí quieras actualizar aquí
                 // updated_at: new Date().toISOString()
             };
+            console.log('[DEBUG] Actualizando cliente existente en Supabase:', username, updateFields);
             await supabase.update('clients', updateFields, { username: username });
         } else {
             // Insertar nuevo cliente (incluye document_number si es la primera vez)
-            await supabase.insert('clients', supabaseData);
+            try {
+                const insertResult = await supabase.insert('clients', supabaseData);
+                console.log('[DEBUG] Resultado del insert en Supabase:', insertResult);
+            } catch (insertError) {
+                console.error('[ERROR] Fallo el insert en Supabase:', insertError);
+                throw insertError;
+            }
             // Generar API key solo para persona jurídica
             if (supabaseData.document_type === 'J') {
                 const apiKey = crypto.randomUUID();
@@ -770,4 +782,3 @@ window.saveTransactionToSupabase = saveTransactionToSupabase;
 
 console.log('🔄 Sistema híbrido localStorage + Supabase inicializado');
 console.log('📊 Estado:', getHybridSystemStatus());
-
