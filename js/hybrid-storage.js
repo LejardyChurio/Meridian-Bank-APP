@@ -218,16 +218,19 @@ class HybridStorage {
             console.log('[DEBUG] Actualizando cliente existente en Supabase:', username, updateFields);
             await supabase.update('clients', updateFields, { username: username });
         } else {
-            // Validar duplicados de document_number y comercio_codigo antes de insertar
+            // Validar duplicados de document_number antes de insertar
             const documentNumberExists = await supabase.select('clients', '*', { document_number: supabaseData.document_number });
             if (documentNumberExists.length > 0) {
                 console.log('[DEBUG] Número de documento ya existe en Supabase:', supabaseData.document_number);
                 throw new Error('El número de documento ya está registrado en Supabase');
             }
-            const comercioCodigoExists = await supabase.select('clients', '*', { comercio_codigo: supabaseData.comercio_codigo });
-            if (comercioCodigoExists.length > 0) {
-                console.log('[DEBUG] Código de comercio ya existe en Supabase:', supabaseData.comercio_codigo);
-                throw new Error('El código de comercio ya está registrado en Supabase');
+            // Validar duplicado de comercio_codigo solo si el campo NO está vacío
+            if (supabaseData.comercio_codigo && supabaseData.comercio_codigo.trim() !== '') {
+                const comercioCodigoExists = await supabase.select('clients', '*', { comercio_codigo: supabaseData.comercio_codigo });
+                if (comercioCodigoExists.length > 0) {
+                    console.log('[DEBUG] Código de comercio ya existe en Supabase:', supabaseData.comercio_codigo);
+                    throw new Error('El código de comercio ya está registrado en Supabase');
+                }
             }
             // Insertar nuevo cliente (incluye document_number si es la primera vez)
             try {
