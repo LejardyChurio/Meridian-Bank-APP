@@ -209,48 +209,42 @@ class HybridStorage {
         // Verificar si el cliente ya existe por username
         const existing = await supabase.select('clients', '*', { username: username });
         if (existing.length > 0) {
-            // Solo actualizar saldo_cuenta y campos permitidos, NO document_number ni otros sensibles
-            const updateFields = {
-                saldo_cuenta: supabaseData.saldo_cuenta,
-                // Puedes agregar otros campos que sí quieras actualizar aquí
-                // updated_at: new Date().toISOString()
-            };
-            console.log('[DEBUG] Actualizando cliente existente en Supabase:', username, updateFields);
-            await supabase.update('clients', updateFields, { username: username });
-        } else {
-            // Validar duplicados de document_number antes de insertar
-            const documentNumberExists = await supabase.select('clients', '*', { document_number: supabaseData.document_number });
-            if (documentNumberExists.length > 0) {
-                console.log('[DEBUG] Número de documento ya existe en Supabase:', supabaseData.document_number);
-                throw new Error('El número de documento ya está registrado en Supabase');
+            console.log('[DEBUG] Username ya existe en Supabase:', username);
+            throw new Error('El nombre de usuario ya está registrado en Supabase');
+        }
+
+        // Validar duplicados de document_number antes de insertar
+        const documentNumberExists = await supabase.select('clients', '*', { document_number: supabaseData.document_number });
+        if (documentNumberExists.length > 0) {
+            console.log('[DEBUG] Número de documento ya existe en Supabase:', supabaseData.document_number);
+            throw new Error('El número de documento ya está registrado en Supabase');
+        }
+        // Validar duplicado de comercio_codigo solo si el campo NO está vacío
+        if (supabaseData.comercio_codigo && supabaseData.comercio_codigo.trim() !== '') {
+            const comercioCodigoExists = await supabase.select('clients', '*', { comercio_codigo: supabaseData.comercio_codigo });
+            if (comercioCodigoExists.length > 0) {
+                console.log('[DEBUG] Código de comercio ya existe en Supabase:', supabaseData.comercio_codigo);
+                throw new Error('El código de comercio ya está registrado en Supabase');
             }
-            // Validar duplicado de comercio_codigo solo si el campo NO está vacío
-            if (supabaseData.comercio_codigo && supabaseData.comercio_codigo.trim() !== '') {
-                const comercioCodigoExists = await supabase.select('clients', '*', { comercio_codigo: supabaseData.comercio_codigo });
-                if (comercioCodigoExists.length > 0) {
-                    console.log('[DEBUG] Código de comercio ya existe en Supabase:', supabaseData.comercio_codigo);
-                    throw new Error('El código de comercio ya está registrado en Supabase');
-                }
-            }
-            // Insertar nuevo cliente (incluye document_number si es la primera vez)
-            try {
-                const insertResult = await supabase.insert('clients', supabaseData);
-                console.log('[DEBUG] Resultado del insert en Supabase:', insertResult);
-            } catch (insertError) {
-                console.error('[ERROR] Fallo el insert en Supabase:', insertError);
-                throw insertError;
-            }
-            // Generar API key solo para persona jurídica
-            if (supabaseData.document_type === 'J') {
-                const apiKey = crypto.randomUUID();
-                await supabase.insert('api_keys', {
-                    key: apiKey,
-                    commerce_id: supabaseData.username,
-                    status: 'active',
-                    created_at: new Date().toISOString()
-                });
-                console.log('✅ API key generada y guardada para comercio:', apiKey);
-            }
+        }
+        // Insertar nuevo cliente (incluye document_number si es la primera vez)
+        try {
+            const insertResult = await supabase.insert('clients', supabaseData);
+            console.log('[DEBUG] Resultado del insert en Supabase:', insertResult);
+        } catch (insertError) {
+            console.error('[ERROR] Fallo el insert en Supabase:', insertError);
+            throw insertError;
+        }
+        // Generar API key solo para persona jurídica
+        if (supabaseData.document_type === 'J') {
+            const apiKey = crypto.randomUUID();
+            await supabase.insert('api_keys', {
+                key: apiKey,
+                commerce_id: supabaseData.username,
+                status: 'active',
+                created_at: new Date().toISOString()
+            });
+            console.log('✅ API key generada y guardada para comercio:', apiKey);
         }
         // Guardar tarjeta de crédito si existe
         if (clientData.clientData && clientData.clientData.creditCard) {
