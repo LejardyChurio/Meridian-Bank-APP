@@ -205,23 +205,7 @@ class HybridStorage {
         // Convertir formato localStorage a Supabase
         const supabaseData = this.convertToSupabaseFormat(username, clientData);
         console.log('[DEBUG] Intentando guardar en Supabase. Datos a insertar:', supabaseData);
-        // Validar duplicados en Supabase antes de insertar
-        const usernameExists = await supabase.select('clients', '*', { username: supabaseData.username });
-        if (usernameExists.length > 0) {
-            console.log('[DEBUG] Username ya existe en Supabase:', supabaseData.username);
-            throw new Error('El nombre de usuario ya está registrado en Supabase');
-        }
-        const documentNumberExists = await supabase.select('clients', '*', { document_number: supabaseData.document_number });
-        if (documentNumberExists.length > 0) {
-            console.log('[DEBUG] Número de documento ya existe en Supabase:', supabaseData.document_number);
-            throw new Error('El número de documento ya está registrado en Supabase');
-        }
-        // Validar duplicado de comercio_codigo en Supabase (mismo estilo que document_number)
-        const comercioCodigoExists = await supabase.select('clients', '*', { comercio_codigo: supabaseData.comercio_codigo });
-        if (comercioCodigoExists.length > 0) {
-            console.log('[DEBUG] Código de comercio ya existe en Supabase:', supabaseData.comercio_codigo);
-            throw new Error('El código de comercio ya está registrado en Supabase');
-        }
+
         // Verificar si el cliente ya existe por username
         const existing = await supabase.select('clients', '*', { username: username });
         if (existing.length > 0) {
@@ -234,6 +218,17 @@ class HybridStorage {
             console.log('[DEBUG] Actualizando cliente existente en Supabase:', username, updateFields);
             await supabase.update('clients', updateFields, { username: username });
         } else {
+            // Validar duplicados de document_number y comercio_codigo antes de insertar
+            const documentNumberExists = await supabase.select('clients', '*', { document_number: supabaseData.document_number });
+            if (documentNumberExists.length > 0) {
+                console.log('[DEBUG] Número de documento ya existe en Supabase:', supabaseData.document_number);
+                throw new Error('El número de documento ya está registrado en Supabase');
+            }
+            const comercioCodigoExists = await supabase.select('clients', '*', { comercio_codigo: supabaseData.comercio_codigo });
+            if (comercioCodigoExists.length > 0) {
+                console.log('[DEBUG] Código de comercio ya existe en Supabase:', supabaseData.comercio_codigo);
+                throw new Error('El código de comercio ya está registrado en Supabase');
+            }
             // Insertar nuevo cliente (incluye document_number si es la primera vez)
             try {
                 const insertResult = await supabase.insert('clients', supabaseData);
